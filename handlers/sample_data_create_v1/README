@@ -1,0 +1,33 @@
+== Sample_Data_Create
+
+This handler creates a single piece of sample data.  
+
+=== Parameters
+[Error Handling]
+  Determine what to return if an error is encountered.
+[Field]
+  The data field to create.
+
+=== Sample Configuration
+Error Handling:          Error Message
+Field: 									 Name.name
+
+=== Results
+[Handler Error Message]
+  Error message if an error was encountered and Error Handling is set to "Error Message".
+[output]
+  The data that was created.
+
+=== Detailed Description
+Use the Sample Data Create handle to generate Users, Companies or other data enteries.  
+This handler leverages the [Faker gem v1.9.1[](https://github.com/stympy/faker/tree/v1.9.1/doc).  
+Visit faker's git repo for a list of the method that are supported.
+
+== Notes
+Only method that have a "basic" types as parameters are supported.  ie String, numbers or booleans.
+As an example Faker::Date.between(2.days.ago, Date.today) would not be supported because it requires
+complex parameters.
+
+Only the feature provided as of v1.9.1 of the Faker library are supported.
+
+The "uniqueness" feature provided by the Faker library is not available for use.

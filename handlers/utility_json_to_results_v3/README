@@ -1,0 +1,24 @@
+== Utility JSON to Results
+   This handler converts JSON to an XML string of results.
+
+=== Parameters
+    [JSON]
+          A string of JSON to be converted.
+			
+=== Results
+    Returns a string of xml sorted by key representing the given json.
+
+==== Sample Configuration
+     JSON : {"key6":"val6", "key1":"val1", "key2":"val2"}
+
+
+     results:
+     <results>
+	<result name="key1">val1</result>
+	<result name="key2">val2</result>
+	<result name="key6">val6</result>
+     <results>
+
+=== Detailed Description
+    This handler converts JSON to an XML string of results. An exception is thrown
+    if the JSON is not properly formatted.

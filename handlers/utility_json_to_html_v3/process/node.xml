@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<taskDefinition id="utility_json_to_html" name="Utility JSON To HTML" schema_version="1.0" version="3">
+    <author>support@kineticdata.com</author>
+    <description>This handler converts a JSON string into a HTML table.</description>
+    <helpurl>http://ktc.kineticdata.com/handler/utility_json_to_csv/1</helpurl>
+    <visible>true</visible>
+    <deferrable>false</deferrable>
+    <parameters>
+        <parameter id="json" label="JSON" required="true"
+          tooltip="The JSON String to be converted to HTML"/>
+    </parameters>
+    <handler name="utility_json_to_html" version="3">
+	    <infos>
+			<info name="enable_debug_logging">&lt;%= @info['enable_debug_logging'] %&gt;</info>
+        </infos>
+        <parameters>
+            <parameter name="json">&lt;%= @parameters['json'] %&gt;</parameter>
+        </parameters>
+    </handler>
+    <results format="xml">
+        <result name="HTML"/>
+    </results>
+</taskDefinition>

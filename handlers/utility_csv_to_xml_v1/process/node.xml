@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<taskDefinition id="utility_csv_to_xml" name="Utility CSV To XML" schema_version="1.0" version="1">
+    <author>support@kineticdata.com</author>
+    <description>Converts a CSV string to an XML string</description>
+    <helpurl/>
+    <visible>false</visible>
+    <deferrable>false</deferrable>
+    <parameters>
+        <parameter id="csv" label="CSV" required="true"
+          tooltip=""/>
+    </parameters>
+    <handler name="utility_csv_to_xml" version="1">
+        <parameters>
+            <parameter name="csv">&lt;%= @parameters['csv'] %&gt;</parameter>
+        </parameters>
+    </handler>
+    <results format="xml">
+        <result name="XML"/>
+    </results>
+</taskDefinition>

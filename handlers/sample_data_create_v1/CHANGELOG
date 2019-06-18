@@ -1,0 +1,11 @@
+Sample Data Create V1 (2019-01-28)
+* Fixed bug with error handling and updated Readme.
+
+Sample Data Create V1 (2019-01-14)
+* Updated Readme and Changelog to correct formats.
+
+Sample Data Create V1 (2019-01-14)
+* Added if not defined for Faker gem and it's dependancies.
+
+Sample Data Create V1 (2019-01-11)
+* Initial version.  See README for details.

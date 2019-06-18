@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<taskDefinition id="utility_json_parse" name="Utility Json Parse" schema_version="1.0" version="1">
+    <author>support@kineticdata.com</author>
+    <description>This handler parses a JSON string with a given path and returns the data found at the path</description>
+    <helpurl/>
+    <visible>true</visible>
+    <deferrable>false</deferrable>
+    <parameters>
+        <parameter id="json" label="JSON" required="true" tooltip="The JSON structure to be parsed"/>
+        <parameter id="path" label="Path" required="true" tooltip="The Path to the data that should be returned"/>
+        <parameter id="unique" label="Unique" required="true" tooltip="If set to Yes, the list of items with contain no duplicates" menu="No,Yes"/>
+    </parameters>
+    <handler name="utility_json_parse" version="1">
+        <parameters>
+            <parameter name="json">&lt;%= @parameters['json'] %&gt;</parameter>
+            <parameter name="path">&lt;%= @parameters['path'] %&gt;</parameter>
+            <parameter name="unique">&lt;%= @parameters['unique'] %&gt;</parameter>
+        </parameters>
+    </handler>
+    <results format="xml">
+        <result name="Items"/>
+    </results>
+</taskDefinition>

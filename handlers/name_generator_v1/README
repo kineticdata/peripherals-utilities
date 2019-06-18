@@ -1,0 +1,12 @@
+== NameGeneratorV1
+Generates a name like wild-flower-10
+
+=== Parameters
+None
+
+==== Sample Configuration
+
+=== Results
+[Standard Output]
+  A String, like: wild-flower-10
+[Error Output]

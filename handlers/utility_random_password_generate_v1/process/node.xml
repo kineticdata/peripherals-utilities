@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<taskDefinition id="utility_random_password_generate" name="Utility Random Password Generate" schema_version="1.0" version="1">
+    <author>support@kineticdata.com</author>
+    <description>
+        Generates a human readable random password - intended to be immediately
+        changed once used.
+    </description>
+    <helpurl>http://ktc.kineticdata.com/handler/utility_random_password_generate/1</helpurl>
+    <visible>true</visible>
+    <deferrable>false</deferrable>
+    <parameters>
+    </parameters>
+    <handler name="utility_random_password_generate" version="1">
+    </handler>
+    <results format="xml">
+        <result name="temporary_password"/>
+    </results>
+</taskDefinition>

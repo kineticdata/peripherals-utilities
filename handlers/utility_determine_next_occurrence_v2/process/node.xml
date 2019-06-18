@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<taskDefinition id="utility_determine_next_occurrence" name="Utility Determine Next Occurrence" schema_version="1.0" version="2">
+    <author>support@kineticdata.com</author>
+    <description>This handler determines the next occurence based on a provided start time and other recurrence information</description>
+    <helpurl>http://community.kineticdata.com/Kinetic_Task/Task_Handlers_and_Sources</helpurl>
+    <visible>false</visible>
+    <deferrable>false</deferrable>
+    <parameters>
+        <parameter id="start" label="Start (UTC)" required="true"
+            tooltip="The time when the schedule should begin looking for the next occurrence. Enter in a parsable Ruby time (standard Request CE Datetime field works; ex format YYYY-MM-DDTHH:MM:SS+00:00)."/>
+        <parameter id="recurrence_type" label="Recurrence Type" required="true"
+            tooltip="Valid options are 'minutely' [requires interval],'hourly' [requires interval],'daily' [requires interval],'weekly' [requires interval],'monthly' [requires timing, interval and either weekdays or days of month],'yearly' [requires timing, interval, months, and either weekdays or days of month]"/>
+        <parameter id="timing" label="Timing" required="false"
+            tooltip="Required for monthly and yearly Recurrence Types.  Valid options are 'Relative' or 'Absolute'. Relative refers to relatives dates (ex: First Monday in May and June) and Absolute refers to specific dates (ex: 7th and 10th of June)"/>
+        <parameter id="interval" label="Interval" required="true"
+            tooltip="The interval between the recurrence_type values."/>
+        <parameter id="months" label="Months" required="false"
+            tooltip="The months in which this schedule should execute. Possible vales are entered in a comma separated list, with the values of 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'.  Any combination of values is fine. Example: January, April, July, October"/>
+        <parameter id="days_of_month" label="Days of Month" required="false"
+            tooltip="The dates on which this schedule should execute. Possible vales are entered in a comma separated list, with the values of 1 through 31, and 'last'.  Any combination of values is fine. Example: 1, 15, Last"/>
+        <parameter id="weekdays" label="Weekdays" required="false"
+            tooltip="The weekdays in which this schedule should execute. Possible vales are entered in a comma separated list, with the values of 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'.  Any combination of values is fine. Example: Monday, Thursday, Saturday"/>
+        <parameter id="sunday_index" label="Sunday Index" required="false"
+            tooltip="Required when Sunday field is populated AND recurrence type is NOT weekly. Possible values are entered in a comma separated list, with the values of 'All', 'First, 'Second', 'Third', 'Fourth', 'Last'.  'All' is exclusive to other values.  If not using 'All', any combination of other values is fine.  Example 1: All, Example 2: First, Second, Last"/>
+        <parameter id="monday_index" label="Monday Index" required="false"
+            tooltip="Required when Monday field is populated AND recurrence type is NOT weekly. Possible values are entered in a comma separated list, with the values of 'All', 'First, 'Second', 'Third', 'Fourth', 'Last'.  'All' is exclusive to other values.  If not using 'All', any combination of other values is fine.  Example 1: All, Example 2: First, Second, Last"/>
+        <parameter id="tuesday_index" label="Tuesday Index" required="false"
+            tooltip="Required when Tuesday field is populated AND recurrence type is NOT weekly. Possible values are entered in a comma separated list, with the values of 'All', 'First, 'Second', 'Third', 'Fourth', 'Last'.  'All' is exclusive to other values.  If not using 'All', any combination of other values is fine.  Example 1: All, Example 2: First, Second, Last"/>
+        <parameter id="wednesday_index" label="Wednesday Index" required="false"
+            tooltip="Required when Wednesday field is populated AND recurrence type is NOT weekly. Possible values are entered in a comma separated list, with the values of 'All', 'First, 'Second', 'Third', 'Fourth', 'Last'.  'All' is exclusive to other values.  If not using 'All', any combination of other values is fine.  Example 1: All, Example 2: First, Second, Last"/>
+        <parameter id="thursday_index" label="Thursday Index" required="false"
+            tooltip="Required when Thursday field is populated AND recurrence type is NOT weekly. Possible values are entered in a comma separated list, with the values of 'All', 'First, 'Second', 'Third', 'Fourth', 'Last'.  'All' is exclusive to other values.  If not using 'All', any combination of other values is fine.  Example 1: All, Example 2: First, Second, Last"/>
+        <parameter id="friday_index" label="Friday Index" required="false"
+            tooltip="Required when Friday field is populated AND recurrence type is NOT weekly. Possible values are entered in a comma separated list, with the values of 'All', 'First, 'Second', 'Third', 'Fourth', 'Last'.  'All' is exclusive to other values.  If not using 'All', any combination of other values is fine.  Example 1: All, Example 2: First, Second, Last"/>
+        <parameter id="saturday_index" label="Saturday Index" required="false"
+            tooltip="Required when Saturday field is populated AND recurrence type is NOT weekly. Possible values are entered in a comma separated list, with the values of 'All', 'First, 'Second', 'Third', 'Fourth', 'Last'.  'All' is exclusive to other values.  If not using 'All', any combination of other values is fine.  Example 1: All, Example 2: First, Second, Last"/>
+    </parameters>
+    <handler name="utility_determine_next_occurrence" version="2">
+        <infos>
+            <info name="enable_debug_logging">&lt;%= @info['enable_debug_logging'] %&gt;</info>
+        </infos>
+        <parameters>
+            <parameter name="start">&lt;%= @parameters['start'] %&gt;</parameter>
+            <parameter name="recurrence_type">&lt;%= @parameters['recurrence_type'] %&gt;</parameter>
+            <parameter name="timing">&lt;%= @parameters['timing'] %&gt;</parameter>
+            <parameter name="interval">&lt;%= @parameters['interval'] %&gt;</parameter>
+            <parameter name="months">&lt;%= @parameters['months'] %&gt;</parameter>
+            <parameter name="days_of_month">&lt;%= @parameters['days_of_month'] %&gt;</parameter>
+            <parameter name="weekdays">&lt;%= @parameters['weekdays'] %&gt;</parameter>
+            <parameter name="sunday_index">&lt;%= @parameters['sunday_index'] %&gt;</parameter>
+            <parameter name="monday_index">&lt;%= @parameters['monday_index'] %&gt;</parameter>
+            <parameter name="tuesday_index">&lt;%= @parameters['tuesday_index'] %&gt;</parameter>
+            <parameter name="wednesday_index">&lt;%= @parameters['wednesday_index'] %&gt;</parameter>
+            <parameter name="thursday_index">&lt;%= @parameters['thursday_index'] %&gt;</parameter>
+            <parameter name="friday_index">&lt;%= @parameters['friday_index'] %&gt;</parameter>
+            <parameter name="saturday_index">&lt;%= @parameters['saturday_index'] %&gt;</parameter>
+        </parameters>
+    </handler>
+    <results>
+        <result name="next_occurrence"/>
+    </results>
+</taskDefinition>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<taskDefinition id="sample_data_create" name="Sample Data Create" schema_version="1.0" version="1">
+    <author>support@kineticdata Com</author>
+    <description>This handler generate fake data based for testing.</description>
+    <helpurl></helpurl>
+    <visible>true</visible>
+    <deferrable>false</deferrable>
+    <parameters>
+        <parameter id="error_handling" label="Error Handling" required="true"
+          tooltip="Determine what to return if an error is encountered."
+          menu="Error Message,Raise Error">Error Message</parameter>
+        <parameter id="field" label="Field" required="true"
+          tooltip="A Class name and method to generate a random output; ex Name.name. Visit stympy/faker on github (tag v1.9.1) for more examples."/>
+    </parameters>
+    <handler name="sample_data_create" version="1">
+        <parameters>
+            <parameter name="error_handling">&lt;%= @parameters.has_key?("error_handling") ?
+                @parameters["error_handling"] : "Raise Error" %&gt;</parameter>
+            <parameter name="field">&lt;%= @parameters['field'] %&gt;</parameter>
+        </parameters>
+    </handler>
+    <results format="xml">
+        <result name="Handler Error Message"/>
+        <result name="output"/>
+    </results>
+</taskDefinition>

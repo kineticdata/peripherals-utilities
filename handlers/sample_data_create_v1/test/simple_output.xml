@@ -1,0 +1,4 @@
+<results>
+    <result name="Handler Error Message"></result>
+    <result name="output">{&quot;table&quot;:[{&quot;a&quot;:&quot;animal&quot;,&quot;b&quot;:&quot;boat&quot;,&quot;c&quot;:&quot;car&quot;},{&quot;c&quot;:&quot;cat&quot;,&quot;d&quot;:&quot;dog&quot;},{&quot;e&quot;:&quot;eel&quot;}]}</result>
+</results>

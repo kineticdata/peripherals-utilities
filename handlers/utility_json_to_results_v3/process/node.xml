@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<taskDefinition id="utility_json_to_results" name="Utility JSON to Results"
+	schema_version="1.0" version="3">
+	<author>support@kineticdata.com</author>
+	<description>Converts JSON to XML result.</description>
+	<helpurl></helpurl>
+	<visible>false</visible>
+	<deferrable>false</deferrable>
+	<parameters>
+	    <parameter id="json" label="JSON String" required="true" tooltip="The JSON string to be converted." />
+	</parameters>
+	<handler name="utility_json_to_results" version="3">
+		<parameters>
+		    <parameter name="json">&lt;%= @parameters['json'] %&gt;</parameter>
+		</parameters>
+	</handler>
+	<results format="xml">
+	  <result name="#JSON TO XML RESULTS PLACE HOLDER#" />
+	</results> 
+</taskDefinition>

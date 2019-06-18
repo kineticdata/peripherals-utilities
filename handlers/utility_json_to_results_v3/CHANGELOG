@@ -1,0 +1,10 @@
+v3
+* Changed json library to 1.4.6 for use 
+  with Task 4
+  
+utility_json_to_results_v2
+* escaped results
+* set placeholder for results in node.xml
+
+utility_json_to_results_v1 (2011-07-01)
+* Initial version.  See README for details.

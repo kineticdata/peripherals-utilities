@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<taskDefinition id="utility_csv_to_json" name="Utility CSV To JSON" schema_version="1.0" version="1">
+    <author>support@kineticdata.com</author>
+    <description>This handler converts a CSV string into a JSON string.</description>
+    <helpurl>http://ktc.kineticdata.com/handler/utility_csv_to_json/1</helpurl>
+    <visible>true</visible>
+    <deferrable>false</deferrable>
+    <parameters>
+        <parameter id="csv" label="CSV" required="true"
+          tooltip="The CSV String to be converted to JSON"/>
+    </parameters>
+    <handler name="utility_csv_to_json" version="1">
+        <parameters>
+            <parameter name="csv">&lt;%= @parameters['csv'] %&gt;</parameter>
+        </parameters>
+    </handler>
+    <results format="xml">
+        <result name="JSON"/>
+    </results>
+</taskDefinition>

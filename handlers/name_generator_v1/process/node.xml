@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<taskDefinition id="name_generator" name="Name Generator" schema_version="1.0" version="1">
+    <author>support@kineticdata.com</author>
+    <description>Generates a simple name like: frosty-tree-15.</description>
+    <helpurl></helpurl>
+    <visible>false</visible>
+    <deferrable>false</deferrable>
+    <parameters>
+    </parameters>
+    <handler name="name_generator" version="1">
+        <parameters>
+        </parameters>
+    </handler>
+    <results format="xml">
+        <result name="Name"/>
+    </results>
+</taskDefinition>

@@ -1,0 +1,8 @@
+Utility JSON to CSV V2.1 (2018-07-02)
+* Updated dependencies.rb to skip loading JSON in Task 4 because it is already loaded by default
+
+Utility JSON to CSV V2 (2016-09-27)
+* Updated for new version of CSV in Task 4
+
+Utility JSON to CSV V1 (2010-05-24)
+* Initial version.  See README for details.

@@ -1,0 +1,61 @@
+== Utility_Determine_Next_Occurrence
+This handler returns the next date/time for a schedule.  Originally designed for use with Kinetic Robot Task Trees, it uses the IceCube gem.
+
+=== Parameters
+[Start (UTC)]
+  The time when the schedule should begin looking for the next occurrence. Enter in a parsable Ruby time (standard Request CE Datetime field works; ex format YYYY-MM-DDTHH:MM:SS+00:00).
+[Recurrence Type]
+  Valid options are 'minutely' [requires interval],'hourly' [requires interval],'daily' [requires interval],'weekly' [requires interval],'monthly' [requires timing, interval and either weekdays or days of month],'yearly' [requires timing, interval, months, and either weekdays or days of month]
+[Timing]
+  Required for monthly and yearly Recurrence Types.  Valid options are 'Relative' or 'Absolute'. Relative refers to relatives dates (ex: First Monday in May and June) and Absolute refers to specific dates (ex: 7th and 10th of June)
+[Interval]
+  The interval between the Recurrence Type values.
+[Months]
+  The months in which this schedule should execute. Possible vales are entered in a comma separated list, with the values of 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'.  Any combination of values is fine. Example: January, April, July, October
+[Days of Month]
+  The dates on which this schedule should execute. Possible vales are entered in a comma separated list, with the values of 1 through 31, and 'last'.  Any combination of values is fine. Example: 1, 15, Last
+[Weekdays]
+  The weekdays in which this schedule should execute. Possible vales are entered in a comma separated list, with the values of 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'.  Any combination of values is fine. Example: Monday, Thursday, Saturday
+[Sunday Index]
+  If weekday indexes are used, and an event should occur on some Sundays, include 'All' or any combination of 'First','Second','Third','Fourth','Last'.  Example 1: All, Example 2: First, Second, Last
+[Monday Index]
+  If weekday indexes are used, and an event should occur on some Mondays, include 'All' or any combination of 'First','Second','Third','Fourth','Last'.  Example 1: All, Example 2: First, Second, Last
+[Tuesday Index]
+  If weekday indexes are used, and an event should occur on some Tuesdays, include 'All' or any combination of 'First','Second','Third','Fourth','Last'.  Example 1: All, Example 2: First, Second, Last
+[Wednesday Index]
+  If weekday indexes are used, and an event should occur on some Wednesdays, include 'All' or any combination of 'First','Second','Third','Fourth','Last'.  Example 1: All, Example 2: First, Second, Last
+[Thursday Index]
+  If weekday indexes are used, and an event should occur on some Thursdays, include 'All' or any combination of 'First','Second','Third','Fourth','Last'.  Example 1: All, Example 2: First, Second, Last
+[Friday Index]
+  If weekday indexes are used, and an event should occur on some Fridays, include 'All' or any combination of 'First','Second','Third','Fourth','Last'.  Example 1: All, Example 2: First, Second, Last
+[Saturday Index]
+  If weekday indexes are used, and an event should occur on some Saturday, include 'All' or any combination of 'First','Second','Third','Fourth','Last'.  Example 1: All, Example 2: First, Second, Last
+
+=== Results
+[next_occurrence]
+  This handler returns the Next Occurrence in UTC time based on the inputs.
+  Example: 2018-03-02 22:00:00 UTC
+
+==== Sample Configuration
+Start (UTC):        2016-09-25 14:00:00 UTC
+Recurrence Type:    Monthly
+Timing:             Relative
+Interval:           1
+Months:             January, April, July, October
+Days of Month:
+Weekdays:           Monday
+Sunday Index:
+Monday Index:       First
+Tuesday Index:
+Wednesday Index:
+Thursday Index:
+Friday Index:
+Saturday Index:
+
+=== Detailed Description
+This handler uses the IceCube library to configure a schedule and then based on
+a start date, calculates the next occurrence.  This value is returned in string
+format in the result field 'next_occurrence'.
+
+The bulk of the handler code evaluates and transforms the inputs so the IceCube
+library can define the schedule and then perform the evaluation.
