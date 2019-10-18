@@ -1,0 +1,3 @@
+com.kineticdata.filehub.adapters.cloud.CloudFilestoreAmazonS3Adapter
+com.kineticdata.filehub.adapters.cloud.CloudFilestoreMicrosoftAzureAdapter
+com.kineticdata.filehub.adapters.cloud.CloudFilestoreOpenstackSwiftAdapter
