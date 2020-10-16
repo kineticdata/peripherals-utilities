@@ -1,1 +1,8 @@
---- {}
+---
+repo-name: peripherals-utilities
+categories:
+  - cloud
+display-name: Utilities
+manufacturer: n/a
+product: Utilities
+description: A set of generic utilitys for creating or manipulating data.

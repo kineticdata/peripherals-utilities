@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<taskDefinition id="utility_json_path_parse" name="Json Path Parse" schema_version="1.0" version="1">
+    <author>support@kineticdata.com</author>
+    <description>Json path parse handler will apply the jayway json path expression to the provided object.</description>
+    <helpurl></helpurl>
+    <visible>true</visible>
+    <deferrable>false</deferrable>
+    <parameters>
+        <parameter id="error_handling" label="Error Handling" required="true"
+          tooltip="Determine what to return if an error is encountered."
+          menu="Error Message,Raise Error">Error Message</parameter>
+        <parameter id="json_path" label="Json Path" required="true"
+          tooltip="A JsonPath expression. Start with the 'root member object' $" />
+        <parameter id="json" label="Json Object" required="true"
+          tooltip="Provide a Json object." />
+    </parameters>
+    <handler name="utility_json_path_parse" version="1">
+        <parameters>
+            <parameter name="error_handling">&lt;%= @parameters.has_key?("error_handling") ?
+                @parameters["error_handling"] : "Raise Error" %&gt;</parameter>
+            <parameter name="json_path">&lt;%= @parameters['json_path'] %&gt;</parameter>
+            <parameter name="json">&lt;%= @parameters['json'] %&gt;</parameter>
+        </parameters>
+    </handler>
+    <results format="xml" >
+        <result name="Handler Error Message"/>
+        <result name="output"/>
+    </results>
+</taskDefinition>
