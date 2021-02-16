@@ -76,7 +76,7 @@ public class GenericRestAdapter implements BridgeAdapter {
         new ConfigurableProperty(Properties.PROPERTY_USERNAME).setIsRequired(true),
         new ConfigurableProperty(Properties.PROPERTY_PASSWORD).setIsSensitive(true),
         new ConfigurableProperty(Properties.PROPERTY_ORIGIN).setIsRequired(true)
-            .setDescription("The scheme://hostname:port of the Ars Server")
+            .setDescription("The scheme://hostname:port")
     );
 
     // Local variables to store the property values in
@@ -149,7 +149,7 @@ public class GenericRestAdapter implements BridgeAdapter {
     @Override
     public Record retrieve(BridgeRequest request) throws BridgeError {
         // Log the access
-        LOGGER.trace("Retrieving Kinetic Request CE Record");
+        LOGGER.trace("Retrieving Generic Rest Record");
         LOGGER.trace("  Structure: " + request.getStructure());
         LOGGER.trace("  Query: " + request.getQuery());
         LOGGER.trace("  Fields: " + request.getFieldString());
@@ -159,10 +159,10 @@ public class GenericRestAdapter implements BridgeAdapter {
         // the partial path from query, building partial url and calling the api
         // helper.
         JSONArray jsonArray = getResultsArray(request);
-
+        
         // Build record from response object
         Record record = new Record();
-        if (jsonArray != null) {
+        if (jsonArray != null && jsonArray.size() > 0) {
             // Throw error if multiple results found.
             if (jsonArray.size() > 1) {
                 throw new BridgeError ("Retrieve must return a single result."

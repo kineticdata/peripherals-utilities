@@ -65,7 +65,7 @@ public class GenericRestApiHelper {
             
             // Handle all other faild repsonses
             if (responseCode >= 400) {
-                handleFailedReqeust(responseCode);
+                handleFailedRequest(responseCode);
             } 
         }
         catch (IOException e) {
@@ -76,7 +76,7 @@ public class GenericRestApiHelper {
         return output;
     }
     
-    private void handleFailedReqeust (int responseCode) throws BridgeError {
+    private void handleFailedRequest (int responseCode) throws BridgeError {
         switch (responseCode) {
             case 400:
                 throw new BridgeError("400: Bad Reqeust");
@@ -111,7 +111,7 @@ public class GenericRestApiHelper {
     private String getAuthHeader() {
         String auth = username + ":" + password;
         byte[] encodedAuth = 
-            Base64.encodeBase64(auth.getBytes(StandardCharsets.ISO_8859_1));
+            Base64.encodeBase64(auth.getBytes(StandardCharsets.UTF_8));
         return "Basic " + new String(encodedAuth);
     }
 }
