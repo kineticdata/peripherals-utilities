@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.kineticdata.filehub.adapters.local</groupId>
     <artifactId>kinetic-filehub-adapter-local</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.3</version>
     <packaging>jar</packaging>
     <scm>
         <connection>scm:git:https://github.com/kineticdata/kinetic-filehub-adapter-local.git</connection>
