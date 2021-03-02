@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.TreeSet;
 import org.apache.tika.io.IOUtils;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -57,6 +58,12 @@ public class LocalFilestoreAdapterTest {
         assertEquals("text/plain", document.getContentType());
         assertEquals("subdirectory.txt", document.getName());
         assertEquals((Long)31L, document.getSizeInBytes());
+    }
+        
+    @Test
+    public void test_getDocument_MissingFile() throws Exception {
+        LocalDocument document = adapter.getDocument("missing.txt");
+        assertNull(document);
     }
     
     @Test

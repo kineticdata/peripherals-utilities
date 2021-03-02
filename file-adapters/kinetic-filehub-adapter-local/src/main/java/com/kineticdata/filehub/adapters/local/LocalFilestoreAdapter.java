@@ -158,7 +158,7 @@ public class LocalFilestoreAdapter implements FilestoreAdapter {
         // Concatenate the document root and root-relative path segments
         Path absolutePath = Paths.get(filestoreRootPath.toString(), relativePath.toString()).toAbsolutePath();
         // Return a new local document
-        return new LocalDocument(filestoreRootPath, absolutePath);
+        return Files.exists(absolutePath) ? new LocalDocument(filestoreRootPath, absolutePath) : null;
     }
 
     @Override
