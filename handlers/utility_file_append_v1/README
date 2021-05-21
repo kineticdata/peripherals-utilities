@@ -1,0 +1,28 @@
+== Utility_File_Append
+
+This handler appends the content input to the end of the specified file.
+
+=== Parameters
+[File Path]
+  The full path (including file name) to the desired file to be appended.
+
+[File Content]
+  The content to append at the end of the file.
+
+== Sample Configuration
+
+[File Path]
+  C:\Users\john.smith\Desktop\test.txt
+  //zebra/files/test.csv
+
+=== Results
+[Handler Error Message]
+  If empty result, the update was successful else there will be an error message.
+  
+== Detailed Description
+
+If you are appending to a text file, the file content field should be populated
+with the desired string (i.e. - This is a test.).
+
+If you are populating a comma separated value file, the file content field should
+be populated with comma separated strings (i.e. - "This","is","a","test.").
