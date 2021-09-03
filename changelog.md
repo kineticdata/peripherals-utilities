@@ -1,6 +1,8 @@
 Utilities [handlers] (2020-10-16)
 * [utility_json_path_parse_v1]
     * initial commit.
+* [utility_file_append_v1]
+    * initial commit.
 
 Utilities [file-adapters] (2021-03-01)
 * [kinetic-filehub-adapter-local]
@@ -10,3 +12,4 @@ Utilities [file-adapters] (2021-03-01)
 Utilities [handlers] (2021-09-03)
 * [utility_csv_to_json_v1]
     * Fixed bug with standard error
+
