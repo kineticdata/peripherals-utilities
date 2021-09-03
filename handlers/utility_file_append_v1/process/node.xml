@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<taskDefinition id="utility_file_append" name="Utility File Append" schema_version="1.0" version="1">
+    <author>support@kineticdata.com</author>
+    <description>Appends the content input to the end of the specified file.</description>
+    <helpurl/>
+    <visible>false</visible>
+    <deferrable>false</deferrable>
+    <parameters>
+		<parameter id="error_handling" label="Error Handling" required="true" tooltip="Determine what to return if an error is encountered." menu="Error Message,Raise Error">Error Message</parameter>
+        <parameter id="file_path" label="File Path" required="true"
+          tooltip="The full path (including file name) to the desired file to be appended."/>
+        <parameter id="file_content" label="Content to Append" required="true"
+          tooltip="The content to append at the end of the file."/>
+    </parameters>
+    <handler name="utility_file_append" version="1">
+        <infos>
+			<info name="enable_debug_logging">&lt;%= @info["enable_debug_logging"] %&gt;</info>
+		</infos>
+		<parameters>
+            <parameter name="file_path">&lt;%= @parameters['file_path'] %&gt;</parameter>
+			<parameter name="file_content">&lt;%= @parameters['file_content'] %&gt;</parameter>
+			<parameter name="error_handling">&lt;%= @parameters["error_handling"] %&gt;</parameter>
+        </parameters>
+    </handler>
+    <results format="xml">
+        <result name="Handler Error Message"/>
+    </results>
+</taskDefinition>

@@ -57,7 +57,7 @@ class UtilityCsvToJsonV1
     end
 
     if header.uniq.length != header.length
-      raise StandarError, "Invalid CSV: Header contains duplicates"
+      raise StandardError, "Invalid CSV: Header contains duplicates"
     end
   end
 
