@@ -1,5 +1,21 @@
-# Kinetic Request CE Attachment Upload With API
-    This handler is used to copy an attachment from one submission to another.
+# Generic File Upload CE Attachment
+    This handler is used to copy an attachment from a submission to a third-party using a generic api with token validation in it's url.
+
+## Info Values
+    [Api Server]
+       Kinetic platform api server: http://server:port/kinetic
+    [Api Username]   
+       Kinetic platform user username
+    [Api Password]   
+       Kinetic platform user password 
+    [Space Slug]  
+      Slug of the space where the handler should be imported 
+    [Destination Api]
+      The base url for your third-party destination
+    [Destination Token Name]
+      The token name to be attached to the url
+    [Destination Token Value]
+      the token value to be attached to the url  
 
 ## Parameters
     [Error Handling]
@@ -10,6 +26,10 @@
         Submission Id that contains the attached file to copy.
     [From Form Field Name]
         Name of the file attachment field on the Kinetic Request CE form to copy from
+    [Attachment Index]
+        The index of the aatachment you want to copy 
+    [File Part Parameter]
+        Name of file attachment field as required by your destination api    
     [Multipart Params]
         A JSON object that includes the required multi part parameters to send files to your destination with the provided api 
  ## Results
@@ -33,12 +53,20 @@ From Submission Id:      69825435-2b7b-11e7-983f-0748e4ca60e1
 
 From Form Field Name:    File to Review
 
+Attachment Index:  Index for the attachment to be copied
+
+File Part Parameter: File attachement field name
+
 Multipart Params:        '{
 "fileName": "provide-test.json",
-"folderPath": "/kd-cp-attachments",
+"folderPath": "/some-folder",
 "options": "{\\"access\\":\\"PRIVATE\\"}"
 }'
 
+#### Note: 
+This sample configuration is tailored to match uploading a file using the hubspot api. Find relevant documentation for refrence [here](https://developers.hubspot.com/docs/api/files/files).
+
+Mulitpart Params hold any values needed by the api to process an upload exculding the actual file.
 
 
 ## Detailed Description
