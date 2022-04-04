@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <taskDefinition id="generic_file_upload_ce_attachment" name="Generic File Upload Ce Attachment" schema_version="1.0" version="1">
     <author>support@kineticdata.com</author>
-    <description>This handler is used to upload an attachment from a submission to a third party using a generic API.</description>
+    <description>    This handler is used to copy an attachment from a submission to a third-party using a generic api with token validation in it's url.</description>
     <helpurl></helpurl>
     <visible>false</visible>
     <deferrable>false</deferrable>
