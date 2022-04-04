@@ -15,6 +15,10 @@
             tooltip="Submission Id that contains the attached file to copy"/>
         <parameter id="field_name" label="From Form Field Name" required="true"
             tooltip="Name of the file attachment field on the Kinetic Request CE form to copy from"/>
+        <parameter id="attachment_index" label="Attachment Index" required="true"
+                   tooltip="Attachment index form-data"/>
+        <parameter id="file_part_parameter" label="File Part Parameter" required="true"
+                   tooltip="Provide in file part parameter form-data"/>
         <parameter id="multipart_params" label="Multipart Parameters" required="true"
                    tooltip="Provide in multipart form-data"/>
     </parameters>
@@ -24,8 +28,9 @@
             <info name="api_username">&lt;%= @info['api_username'] %&gt;</info>
             <info name="api_password">&lt;%= @info['api_password'] %&gt;</info>
             <info name="space_slug">&lt;%= @info['space_slug'] %&gt;</info>
-            <info name="destination_key">&lt;%= @info['destination_key'] %&gt;</info>
             <info name="destination_api">&lt;%= @info['destination_api'] %&gt;</info>
+            <info name="destination_token_name">&lt;%= @info['destination_token_name'] %&gt;</info>
+            <info name="destination_token_value">&lt;%= @info['destination_token_value'] %&gt;</info>
             <info name="enable_debug_logging">&lt;%= @info['enable_debug_logging'] %&gt;</info>
         </infos>
         <parameters>
@@ -34,6 +39,8 @@
             <parameter name="space_slug">&lt;%= @parameters['space_slug'] %&gt;</parameter>
             <parameter name="submission_id">&lt;%= @parameters['submission_id'] %&gt;</parameter>
             <parameter name="field_name">&lt;%= @parameters['field_name'] %&gt;</parameter>
+            <parameter name="attachment_index">&lt;%= @parameters['attachment_index'] %&gt;</parameter>
+            <parameter name="file_part_parameter">&lt;%= @parameters['file_part_parameter'] %&gt;</parameter>
             <parameter name="multipart_params">&lt;%= @parameters['multipart_params'] %&gt;</parameter>
         </parameters>
     </handler>

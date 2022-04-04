@@ -51,13 +51,16 @@ class GenericFileUploadCeAttachmentV1
     submission_id    = @parameters["submission_id"]
     field_name       = @parameters["field_name"]
     #Destination
-    destination_key  = @info_values["destination_key"]
     destination_api  = @info_values["destination_api"]
+    destination_token_name = @info_values["destination_token_name"]
+    destination_token_value =  @info_values["destination_token_value"]
+    attachment_index = @parameters["attachment_index"]
     multipart_params = @parameters["multipart_params"]
     #Other Variables
     imported_files = []         # used in handler results
     imported_file_details = []  # used in the destination submission field value
     @multipart_form_array = []
+    @file_part_parameter = @parameters["file_part_parameter"]
 
     # Headers for server: Authorization, Accept, Content-Type
     headers = http_basic_headers(user, pass)
@@ -88,89 +91,96 @@ class GenericFileUploadCeAttachmentV1
       # that can be retrieved to get a link to the attachment in Filehub.
       #
       # Process each attachment file
-      field_value.each_with_index do |attachment_info, index|
-        begin
-          # The attachment file name is stored in the 'name' property
-          attachment_name = attachment_info['name']
+      # field_value.each_with_index do |attachment_info, index|
+      # attachment_index is a value yet to be created
+      
 
-          # Temporary file to stream contents to
-          tempdir = "#{Dir.tmpdir}/#{SecureRandom.hex(8)}"
-          tempfile = "#{tempdir}/#{attachment_name}"
-          FileUtils.mkdir_p(tempdir)
+      attachment_info = field_value[attachment_index.to_i]
+      begin
+        # The attachment file name is stored in the 'name' property
+        attachment_name = attachment_info['name']
 
-
-          # Retrieve the attachment download link from the server
-          puts "Retrieving attachment download link from source submission: #{attachment_name} for field #{field_name}" if @enable_debug_logging
-
-          # API route to get the generated attachment download link from Kinetic Request CE.
-          # "/{spaceSlug}/app/api/v1/submissions/{submissionId}/files/{fieldName}/{fileIndex}/{fileName}/url"
-          download_link_api_route = "#{server}/app/api/v1" <<
-            "/submissions/#{submission_id}" <<
-            "/files/#{URI.escape(field_name)}" <<
-            "/#{index.to_s}/#{URI.escape(attachment_name)}/url"
+        # Temporary file to stream contents to
+        tempdir = "#{Dir.tmpdir}/#{SecureRandom.hex(8)}"
+        tempfile = "#{tempdir}/#{attachment_name}"
+        FileUtils.mkdir_p(tempdir)
 
 
-          # Retrieve the URL to download the attachment from Kinetic Request CE.
-          # This URL will only be valid for a short amount of time before it expires
-          # (usually about 5 seconds).
-          res = http_get(download_link_api_route, {}, headers)
-          if !res.kind_of?(Net::HTTPSuccess)
-            message = "Failed to retrieve link for attachment #{attachment_name} from source submission"
-            return handle_exception(message, res)
-          end
-          file_download_url = JSON.parse(res.body)['url']
-          puts "Received link for attachment #{attachment_name} from source submission" if @enable_debug_logging
+        # Retrieve the attachment download link from the server
+        puts "Retrieving attachment download link from source submission: #{attachment_name} for field #{field_name}" if @enable_debug_logging
+
+        # API route to get the generated attachment download link from Kinetic Request CE.
+        # "/{spaceSlug}/app/api/v1/submissions/{submissionId}/files/{fieldName}/{fileIndex}/{fileName}/url"
+        download_link_api_route = "#{server}/app/api/v1" <<
+          "/submissions/#{submission_id}" <<
+          "/files/#{URI.escape(field_name)}" <<
+          "/#{attachment_index.to_i}/#{URI.escape(attachment_name)}/url"
 
 
-          # Inspect the attachment URL to determine if using FileHub or Agent
-          attachment_uri = URI(file_download_url)
-          query_params = CGI::parse(attachment_uri.query || "")
-          # If url contains a signature query parameter, using FileHub (no authorization header)
-          filestore_headers = query_params.has_key?("signature") && !query_params["signature"].empty? ? {} : headers
-
-
-          # Download the attachment from the source submission
-          puts "Downloading attachment #{attachment_name} from #{file_download_url}" if @enable_debug_logging
-          res = stream_file_download(tempfile, file_download_url, {}, filestore_headers)
-          if !res.kind_of?(Net::HTTPSuccess)
-            message = "Failed to download attachment #{attachment_name} from the filestore server"
-            return handle_exception(message, res)
-          end
-
-          #TODO:
-          # add error handling
-
-          begin
-            multipart_params_hash = JSON.parse(multipart_params)
-            handle_define_multipart_params(multipart_params_hash)
-          rescue StandardError => e
-            p e.message
-          end
-          
-          #need a method for url 
-
-          # Upload the attachment to the destination submission
-          file_upload_url = "#{destination_api}?#{destination_key}"
-          puts "Uploading attachment file: #{attachment_name} to #{file_upload_url}" if @enable_debug_logging
-          res = stream_file_upload(tempfile, file_upload_url, {})
-          if !res.kind_of?(Net::HTTPSuccess)
-            message = "Failed to upload attachment #{attachment_name} to the server"
-            return handle_exception(message, res)
-          end
-          file_upload_details = JSON.parse(res.body)
-
-          # add the uploaded attachment info to the array of imported file details
-          puts "Uploaded attachment details: #{file_upload_details}"
-          imported_file_details.push(file_upload_details)
-
-
-          # add the name of the attachment to the result variable
-          imported_files << attachment_name
-        ensure
-          # Remove the temp directory along with the downloaded attachment
-          FileUtils.rm_rf(tempdir)
+        # Retrieve the URL to download the attachment from Kinetic Request CE.
+        # This URL will only be valid for a short amount of time before it expires
+        # (usually about 5 seconds).
+        res = http_get(download_link_api_route, {}, headers)
+        if !res.kind_of?(Net::HTTPSuccess)
+          message = "Failed to retrieve link for attachment #{attachment_name} from source submission"
+          return handle_exception(message, res)
         end
+        file_download_url = JSON.parse(res.body)['url']
+        puts "Received link for attachment #{attachment_name} from source submission" if @enable_debug_logging
+
+
+        # Inspect the attachment URL to determine if using FileHub or Agent
+        attachment_uri = URI(file_download_url)
+        query_params = CGI::parse(attachment_uri.query || "")
+        # If url contains a signature query parameter, using FileHub (no authorization header)
+        filestore_headers = query_params.has_key?("signature") && !query_params["signature"].empty? ? {} : headers
+
+
+        # Download the attachment from the source submission
+        puts "Downloading attachment #{attachment_name} from #{file_download_url}" if @enable_debug_logging
+        res = stream_file_download(tempfile, file_download_url, {}, filestore_headers)
+        if !res.kind_of?(Net::HTTPSuccess)
+          message = "Failed to download attachment #{attachment_name} from the filestore server"
+          return handle_exception(message, res)
+        end
+
+        #TODO:
+        # add error handling
+
+        begin
+          multipart_params_hash = JSON.parse(multipart_params)
+          handle_define_multipart_params(multipart_params_hash)
+        rescue StandardError => e
+          p e.message
+        end
+        
+        #need a method for url 
+
+        # Upload the attachment to the destination submission
+       
+        file_upload_url = (destination_api.include? "?") ?
+          "#{destination_api}&#{destination_token_name}=#{destination_token_value}" :
+          "#{destination_api}?#{destination_token_name}=#{destination_token_value}"
+        puts "Uploading attachment file: #{attachment_name} to #{file_upload_url}" if @enable_debug_logging
+        res = stream_file_upload(tempfile, file_upload_url, {})
+        if !res.kind_of?(Net::HTTPSuccess)
+          message = "Failed to upload attachment #{attachment_name} to the server"
+          return handle_exception(message, res)
+        end
+        file_upload_details = JSON.parse(res.body)
+
+        # add the uploaded attachment info to the array of imported file details
+        puts "Uploaded attachment details: #{file_upload_details}"
+        imported_file_details.push(file_upload_details)
+
+
+        # add the name of the attachment to the result variable
+        imported_files << attachment_name
+      ensure
+        # Remove the temp directory along with the downloaded attachment
+        FileUtils.rm_rf(tempdir)
       end
+      
 
 
     else
@@ -323,7 +333,7 @@ class GenericFileUploadCeAttachmentV1
     uri = URI.parse(url)
     uri.query = URI.encode_www_form(parameters) unless parameters.empty?
 
-    @multipart_form_array.push([ "file", File.open(file)])
+    @multipart_form_array.push([ @file_part_parameter, File.open(file)])
     puts @multipart_form_array.inspect
     request = Net::HTTP::Post.new(uri)
     request.set_form(@multipart_form_array, "multipart/form-data")
