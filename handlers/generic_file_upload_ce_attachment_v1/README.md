@@ -9,7 +9,7 @@
     [Api Password]   
        Kinetic platform user password 
     [Space Slug]  
-      Slug of the space where the handler should be imported 
+      Slug of the space that contains the attached file to copy
     [Destination Api]
       The base url for your third-party destination
     [Destination Token Name]
@@ -21,7 +21,7 @@
     [Error Handling]
         How to handle error conditions in the handler: raise the error, or return error message
     [Space Slug]
-        Slug of the Space where the handler should be imported
+        Slug of the space that contains the attached file to copy
     [From Submission Id]
         Submission Id that contains the attached file to copy.
     [From Form Field Name]
