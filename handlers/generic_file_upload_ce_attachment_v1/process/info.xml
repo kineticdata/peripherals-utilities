@@ -6,6 +6,6 @@
   <info name="space_slug" description="The space slug (can also be set as a parameter)."></info>
   <info name="destination_api" description="Destination API"></info>
   <info name="destination_token_name" description="Destination Token Name"></info>
-  <info name="destination_token_value" description="Destination Token Value"></info>
+  <info name="destination_token_value" type="encrypt" description="Destination Token Value"></info>
   <info name="enable_debug_logging" description="Enable debug logging if the value is set to 'Yes'.">No</info>
 </taskInfo>
