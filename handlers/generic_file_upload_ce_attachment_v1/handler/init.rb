@@ -57,8 +57,6 @@ class GenericFileUploadCeAttachmentV1
     attachment_index = @parameters["attachment_index"]
     multipart_params = @parameters["multipart_params"]
     #Other Variables
-    imported_files = []         # used in handler results
-    imported_file_details = []  # used in the destination submission field value
     @multipart_form_array = []
     @file_part_parameter = @parameters["file_part_parameter"]
 
@@ -167,27 +165,20 @@ class GenericFileUploadCeAttachmentV1
           message = "Failed to upload attachment #{attachment_name} to the server"
           return handle_exception(message, res)
         end
-        file_upload_details = JSON.parse(res.body)
+        response_body = res.body
 
-        # add the uploaded attachment info to the array of imported file details
-        puts "Uploaded attachment details: #{file_upload_details}"
-        imported_file_details.push(file_upload_details)
+        puts "Successfully uploaded file." if @enable_debug_logging
 
-
-        # add the name of the attachment to the result variable
-        imported_files << attachment_name
       ensure
         # Remove the temp directory along with the downloaded attachment
         FileUtils.rm_rf(tempdir)
       end
       
-
-
     else
       puts "Source submission attachment field value is empty: #{field_name}" if @enable_debug_logging
     end
 
-    results = handle_results(space_slug, "", imported_files)
+    results = handle_results("", attachment_name, response_body)
     puts "Returning results: #{results}" if @enable_debug_logging
     results
   end
@@ -200,12 +191,12 @@ class GenericFileUploadCeAttachmentV1
     end
   end
 
-  def handle_results(space_slug, error_msg, files)
+  def handle_results(error_msg, files, response_body)
     <<-RESULTS
     <results>
       <result name="Handler Error Message">#{ERB::Util.html_escape(error_msg)}</result>
       <result name="Files">#{ERB::Util.html_escape(files.to_json)}</result>
-      <result name="Space Slug">#{ERB::Util.html_escape(space_slug)}</result>
+      <result name="Response Body">#{ERB::Util.html_escape(response_body)}</result>
     </results>
     RESULTS
   end
@@ -231,7 +222,7 @@ class GenericFileUploadCeAttachmentV1
     end
     puts error_message
     raise error_message if @raise_error
-    handle_results(nil, error_message, nil)
+    handle_results(error_message, nil, nil)
   end
 
 
