@@ -31,16 +31,17 @@
     [File Part Parameter]
         Name of file attachment field as required by your destination api    
     [Multipart Params]
-        A JSON object that includes the required multi part parameters to send files to your destination with the provided api 
- ## Results
+        A JSON object that includes the required multi part parameters to send files to your destination with the provided api
+
+## Results
 [Handler Error Message]
   Error message if an error was encountered and Error Handling is set to "Error Message".
 
 [Files]
   Information on the files that were copied.
 
-[Space Slug]
-  The space slug that was used.
+[Response Body]
+  The body of the response from the upload API call.
 
 ## Sample Configuration
 

@@ -2,5 +2,5 @@
 <results>
   <result name="Handler Error Message"></result>
   <result name="Files" type="Regexp">.*</result>
-  <result name="Space Slug" type="Regexp">.*</result>
+  <result name="Response Body" type="Regexp">.*</result>
 </results>
