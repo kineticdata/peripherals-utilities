@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <results>
   <result name="Handler Error Message"></result>
-  <result name="Files" type="Regexp">.*</result>
+  <result name="File" type="Regexp">.*</result>
   <result name="Response Body" type="Regexp">.*</result>
 </results>
