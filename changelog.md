@@ -13,3 +13,6 @@ Utilities [handlers] (2021-09-03)
 * [utility_csv_to_json_v1]
     * Fixed bug with standard error
 
+Utilities [handlers] (2022-04-14)
+* [generic_file_upload_ce_attachment_v1]
+    * Initial commit of handler 
