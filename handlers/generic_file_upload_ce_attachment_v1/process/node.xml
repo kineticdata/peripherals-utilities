@@ -46,7 +46,7 @@
     </handler>
     <results format="xml">
         <result name="Handler Error Message"/>
-        <result name="Files"/>
-        <result name="Space Slug"/>
+        <result name="File"/>
+        <result name="Response Body"/>
     </results>
 </taskDefinition>

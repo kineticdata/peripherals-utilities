@@ -37,8 +37,8 @@
 [Handler Error Message]
   Error message if an error was encountered and Error Handling is set to "Error Message".
 
-[Files]
-  Information on the files that were copied.
+[File]
+  Name of the file that was uploaded to the destination.
 
 [Response Body]
   The body of the response from the upload API call.

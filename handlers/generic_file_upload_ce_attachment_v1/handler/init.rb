@@ -55,10 +55,19 @@ class GenericFileUploadCeAttachmentV1
     destination_token_name = @info_values["destination_token_name"]
     destination_token_value =  @info_values["destination_token_value"]
     attachment_index = @parameters["attachment_index"]
-    multipart_params = @parameters["multipart_params"]
-    #Other Variables
-    @multipart_form_array = []
-    @file_part_parameter = @parameters["file_part_parameter"]
+    file_part_parameter = @parameters["file_part_parameter"]
+
+
+    # Parse the multipart parameter options
+    begin
+      multipart_params = @parameters["multipart_params"].strip.size > 0 ?
+        JSON.parse(@parameters["multipart_params"]) :
+        {}
+    rescue JSON::ParserError => e
+      message = "The multipart params hash parameter is not valid JSON"
+      return handle_exception(message, e)
+    end
+
 
     # Headers for server: Authorization, Accept, Content-Type
     headers = http_basic_headers(user, pass)
@@ -142,32 +151,30 @@ class GenericFileUploadCeAttachmentV1
           return handle_exception(message, res)
         end
 
-        #TODO:
-        # add error handling
+        puts "Uploading attachment file: #{attachment_name} to #{destination_api}" if @enable_debug_logging
 
-        begin
-          multipart_params_hash = JSON.parse(multipart_params)
-          handle_define_multipart_params(multipart_params_hash)
-        rescue StandardError => e
-          p e.message
+        # Add the upload query parameters to the upload URL
+        if destination_token_name.to_s.strip.size > 0
+          file_upload_url = destination_api.include?("?") ?
+          destination_api << "&#{CGI::escape(destination_token_name)}=#{CGI::escape(destination_token_value)}" :
+          destination_api << "?#{CGI::escape(destination_token_name)}=#{CGI::escape(destination_token_value)}"
+        else
+          file_upload_url = destination_api
+          puts "No destination token name provided." if @enable_debug_logging
         end
-        
-        #need a method for url 
 
-        # Upload the attachment to the destination submission
-       
-        file_upload_url = (destination_api.include? "?") ?
-          "#{destination_api}&#{destination_token_name}=#{destination_token_value}" :
-          "#{destination_api}?#{destination_token_name}=#{destination_token_value}"
-        puts "Uploading attachment file: #{attachment_name} to #{file_upload_url}" if @enable_debug_logging
-        res = stream_file_upload(tempfile, file_upload_url, {})
+        # Upload form parameters
+        form_params = multipart_params.merge({ file_part_parameter => File.open(tempfile) })
+
+        # Upload the attachment
+        res = stream_file_upload(file_upload_url, form_params)
         if !res.kind_of?(Net::HTTPSuccess)
           message = "Failed to upload attachment #{attachment_name} to the server"
           return handle_exception(message, res)
         end
-        response_body = res.body
 
         puts "Successfully uploaded file." if @enable_debug_logging
+        response_body = res.body
 
       ensure
         # Remove the temp directory along with the downloaded attachment
@@ -183,19 +190,13 @@ class GenericFileUploadCeAttachmentV1
     results
   end
 
-  def handle_define_multipart_params(multipart_params_hash)
 
-    @multipart_form_array = []
-    multipart_params_hash.each do |key, value|
-      @multipart_form_array.push([key, value])
-    end
-  end
 
-  def handle_results(error_msg, files, response_body)
+  def handle_results(error_msg, filename, response_body)
     <<-RESULTS
     <results>
       <result name="Handler Error Message">#{ERB::Util.html_escape(error_msg)}</result>
-      <result name="Files">#{ERB::Util.html_escape(files.to_json)}</result>
+      <result name="File">#{ERB::Util.html_escape(filename)}</result>
       <result name="Response Body">#{ERB::Util.html_escape(response_body)}</result>
     </results>
     RESULTS
@@ -217,6 +218,8 @@ class GenericFileUploadCeAttachmentV1
       end
     when NilClass
       error_message = "0: No response from server"
+    when JSON::ParserError
+      error_message = message
     else
       error_message = "Unexpected error: #{error.inspect}"
     end
@@ -320,14 +323,11 @@ class GenericFileUploadCeAttachmentV1
   end
 
 
-  def stream_file_upload(file, url, parameters, http_options={})
+  def stream_file_upload(url, form_parameters, http_options={})
     uri = URI.parse(url)
-    uri.query = URI.encode_www_form(parameters) unless parameters.empty?
 
-    @multipart_form_array.push([ @file_part_parameter, File.open(file)])
-    puts @multipart_form_array.inspect
     request = Net::HTTP::Post.new(uri)
-    request.set_form(@multipart_form_array, "multipart/form-data")
+    request.set_form(form_parameters.to_a, "multipart/form-data")
 
     Net::HTTP.start(uri.hostname, uri.port, use_ssl: uri.scheme == 'https') do |http|
       configure_http(http, http_options)
