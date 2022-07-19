@@ -7,6 +7,7 @@ Name | Description
 Username | Username of user to the source system
 Password | Privileged user's password
 URL Origin | Web address to an external server (ex: https://acme.service-now.com)
+Content Type | The content type of the response data (JSON or XML)
 ___
 ## Supported Structures
 The path to the asset that does not contain variables.  _Although the Kinetic Data Platform Adapter is the preferred bridge integration the examples include configuration to get Forms assets from the Kinetic Data Platform._
