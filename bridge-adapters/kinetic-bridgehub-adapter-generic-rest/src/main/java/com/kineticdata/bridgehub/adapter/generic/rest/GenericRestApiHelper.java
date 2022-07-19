@@ -17,8 +17,12 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.json.XML;
+import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 
 public class GenericRestApiHelper {
     private static final Logger LOGGER = 
@@ -27,12 +31,13 @@ public class GenericRestApiHelper {
     private final String origin;
     private final String username;
     private final String password;
+    private final String contentType;
     
-    public GenericRestApiHelper(String origin, String username, String password) {
-        
+    public GenericRestApiHelper(String origin, String username, String password, String contentType) {
         this.origin = origin;
         this.username = username;
         this.password = password;
+        this.contentType = contentType == null || contentType.isEmpty() ? "JSON" : contentType;
     } 
     
     public Object executeRequest (String partialUrl) throws BridgeError{
@@ -48,8 +53,13 @@ public class GenericRestApiHelper {
             HttpGet get = new HttpGet(origin + partialUrl);
 
             get.setHeader("Authorization", getAuthHeader());
-            get.setHeader("Content-Type", "application/json");
-            get.setHeader("Accept", "application/json");
+            if ("XML".equals(contentType)) {
+                get.setHeader("Content-Type", "application/xml");
+                get.setHeader("Accept", "application/xml");
+            } else {
+                get.setHeader("Content-Type", "application/json");
+                get.setHeader("Accept", "application/json");
+            }
             
             response = client.execute(get);
             LOGGER.debug("Recieved response from \"{}\" in {}ms.",
@@ -93,13 +103,17 @@ public class GenericRestApiHelper {
         }
     }
         
-    private Object parseResponse(String output) throws BridgeError{        
+    public Object parseResponse(String output) throws BridgeError{
         Object jsonValue = null;
         
         try {
-            jsonValue = JSONValue.parseWithException(output);
-        } catch (ParseException e){
-            // Assume all 200 responses will be JSON format.
+            if ("XML".equals(contentType)) {
+                jsonValue = JSONValue.parseWithException(XML.toJSONObject(output).toString());
+            } else {
+                jsonValue = JSONValue.parseWithException(output);
+            }
+        } catch (JSONException | ParseException e){
+            // Assume all 200 responses will match the correct JSON or XML content type.
             LOGGER.error("There was a parse exception with the response", e);
         } catch (Exception e) {
             throw new BridgeError("An unexpected error has occured ", e);

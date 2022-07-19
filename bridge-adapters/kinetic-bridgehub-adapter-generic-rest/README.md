@@ -1,5 +1,5 @@
 # Kinetic Bridgehub Adapter Generic Rest
-This adapter can be used to make generic rest calls that require basic auth.  Using JSON Path the adapter is able to handle JSON responses.
+This adapter can be used to make generic rest calls that require basic auth.  The adapter supports either JSON or XML responses, and always returns the data parsed into JSON. JSON Path can be used to retrieve specific parts of the response.
 ___
 ## Adapter Configurations
 Name | Description
@@ -46,6 +46,22 @@ The qualification can have any combination of **path with variables**, query par
  }
 ```
 
+* To access **items** from the below sample XML response: _:$.rss.channel.item_
+``` xml
+<rss>
+  <channel>
+    <item>
+      <id>1</id>
+      <title>Sample One</title>
+    </item>
+    <item>
+      <id>2</id>
+      <title>Sample Two</title>
+    </item>
+  </channel>
+</rss>
+```
+
 ### Example of all three components:
 * /${parameters("Form Slug")}/submissions?q=values['Status']=${parameters("Status")}&include=values:$.submissions..values
 ``` javascript
@@ -63,4 +79,4 @@ ___
 ## Notes
 * [JsonPath](https://github.com/json-path/JsonPath#path-examples) can be used to access nested values. The root of the path is values.
 * Attributes mappings are case sensitive.
-* The Generic Adapter requires a JSON response as a payload.
+* The Generic Adapter requires a JSON or XML response as a payload (type of response needs to be set when configuring the bridge in your space).
