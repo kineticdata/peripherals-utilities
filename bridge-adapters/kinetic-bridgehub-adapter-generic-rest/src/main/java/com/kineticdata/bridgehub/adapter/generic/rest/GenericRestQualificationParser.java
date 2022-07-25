@@ -1,6 +1,5 @@
 package com.kineticdata.bridgehub.adapter.generic.rest;
 
-import com.kineticdata.bridgehub.adapter.BridgeError;
 import com.kineticdata.bridgehub.adapter.QualificationParser;
 import java.util.HashMap;
 import java.util.Map;

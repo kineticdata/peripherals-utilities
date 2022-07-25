@@ -21,8 +21,6 @@ import org.json.XML;
 import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
 
 public class GenericRestApiHelper {
     private static final Logger LOGGER = 
