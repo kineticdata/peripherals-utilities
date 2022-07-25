@@ -16,3 +16,7 @@ Utilities [handlers] (2021-09-03)
 Utilities [handlers] (2022-04-14)
 * [generic_file_upload_ce_attachment_v1]
     * Initial commit of handler 
+
+Utilities [bridge-adapter] (2022-07-25)
+* [kinetic-bridgehub-adapter-generic-rest]
+    * Added XML as a source schema option
