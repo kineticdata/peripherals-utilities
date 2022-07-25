@@ -4,13 +4,10 @@ import com.jayway.jsonpath.JsonPathException;
 import com.kineticdata.bridgehub.adapter.BridgeError;
 import com.kineticdata.bridgehub.adapter.Record;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.JSONValue;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -20,7 +17,7 @@ import org.junit.Test;
  *
  * @author chadrehm
  */
-public class GenericRest_HelperMethodTest {
+public class GenericRest_HelperMethodTest_JSON {
     private String jsonString = "{\"First Name\": \"Foo\", \"Hourly Rate\": "
     + "{\"decimal\": 0.00,\"currency\":"
     + " \"USD\", \"conversionDate\": \"1970-01-01T00:00:00.000+0000\","
