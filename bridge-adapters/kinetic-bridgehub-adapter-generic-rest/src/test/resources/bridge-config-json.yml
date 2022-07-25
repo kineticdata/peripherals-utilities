@@ -5,6 +5,7 @@ Bridge Configuration:
     Username: ""
     Password: ""
     URL Origin: ""
+    Content Type: "JSON"
 
 # Setting the different request configurations for the Standard Bridgehub tests
     # Structure: Structure string
@@ -14,11 +15,11 @@ Bridge Configuration:
     # Single Value Query: A bridge query that ALWAYS return one value
     # Multiple Value Query: A bridge query that returns multiple values
 Test Request Configuration:
-    Structure: "/api/sn_km_api/knowledge/articles"
-    Fields: "id,link"
-    Empty Value Query: "query=asdf:$.result.articles"
-    Single Value Query: "/0b48fd75474321009db4b5b08b9a71c2:$.result"
-    Multiple Value Query: ":$.result.articles"
+    Structure: "/users"
+    Fields: "id,username"
+    Empty Value Query: "id=none"
+    Single Value Query: "/1"
+    Multiple Value Query: ""
 
 # Configuration of the various metadata options
     # Pagination Type: Possible values (string) - offset,token,none

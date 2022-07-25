@@ -69,20 +69,26 @@ public class GenericRestAdapter implements BridgeAdapter {
         public static final String PROPERTY_USERNAME = "Username";
         public static final String PROPERTY_PASSWORD = "Password";
         public static final String PROPERTY_ORIGIN = "URL Origin";
+        public static final String PROPERTY_CONTENT_TYPE = "Content Type";
 
     }
 
     private final ConfigurablePropertyMap properties = new ConfigurablePropertyMap(
-        new ConfigurableProperty(Properties.PROPERTY_USERNAME).setIsRequired(true),
+        new ConfigurableProperty(Properties.PROPERTY_USERNAME),
         new ConfigurableProperty(Properties.PROPERTY_PASSWORD).setIsSensitive(true),
         new ConfigurableProperty(Properties.PROPERTY_ORIGIN).setIsRequired(true)
-            .setDescription("The scheme://hostname:port")
+            .setDescription("The scheme://hostname:port"),
+        new ConfigurableProperty(Properties.PROPERTY_CONTENT_TYPE)
+            .setPossibleValues("JSON", "XML")
+            .setValue("JSON")
+            .setDescription("The content type of the response data")
     );
 
     // Local variables to store the property values in
     private String username;
     private String password;
     private String origin;
+    private String contentType;
     private GenericRestQualificationParser parser;
     private GenericRestApiHelper apiHelper;
     
@@ -97,8 +103,9 @@ public class GenericRestAdapter implements BridgeAdapter {
         username = properties.getValue(Properties.PROPERTY_USERNAME);
         password = properties.getValue(Properties.PROPERTY_PASSWORD);
         origin = properties.getValue(Properties.PROPERTY_ORIGIN);
+        contentType = properties.getValue(Properties.PROPERTY_CONTENT_TYPE);
         
-        apiHelper = new GenericRestApiHelper(origin, username, password);
+        apiHelper = new GenericRestApiHelper(origin, username, password, contentType);
     }
 
     @Override
@@ -244,7 +251,7 @@ public class GenericRestAdapter implements BridgeAdapter {
      * HELPER METHODS
      *--------------------------------------------------------------------------------------------*/
     protected JSONArray getResultsArray(BridgeRequest request) throws BridgeError{
-                // This will be a partial path.
+        // This will be a partial path.
         String path = request.getStructure().trim();
         
         // The qualification can contain a pratial path and JSON root.
@@ -393,8 +400,35 @@ public class GenericRestAdapter implements BridgeAdapter {
                     DocumentContext jsonContext = JsonPath.parse(jsonObj);
                     jsonRootObj = jsonContext.read(root);
                 } catch (JsonPathException e) {
-                    throw new BridgeError("An issue occured when applying JSON path."
-                        + " Please check the root path in the qualification mapping.", e);
+                    // If contentType is XML, do additional checks since empty XML structures will break JSONPath
+                    if ("XML".equals(contentType)) {
+                        // Get root without last leaf and parse again to check if parent of root exists
+                        String subRoot = root.substring(0, root.lastIndexOf("."));
+                        try {
+                            DocumentContext jsonContext = JsonPath.parse(jsonObj);
+                            jsonRootObj = jsonContext.read(subRoot);
+                            
+                            // If subRoot is an object, null, or an empty string, return an empty array
+                            // because XML might be missing the last leaf when it's empty
+                            if (
+                                jsonRootObj instanceof JSONObject 
+                                || jsonRootObj == null 
+                                || (jsonRootObj instanceof String && ((String)jsonRootObj).isEmpty())
+                            ) {
+                                jsonRootObj = new JSONArray();
+                            } else {
+                                // Otherwise throw error
+                                throw new BridgeError("An issue occured when applying JSON path to the parsed XML."
+                                    + " Please check the root path in the qualification mapping.", e);
+                            }
+                        } catch (JsonPathException e2) {
+                            throw new BridgeError("An issue occured when applying JSON path to the parsed XML."
+                                + " Please check the root path in the qualification mapping.", e);
+                        }
+                    } else {
+                        throw new BridgeError("An issue occured when applying JSON path."
+                            + " Please check the root path in the qualification mapping.", e);
+                    }
                 }
                 jsonArray = parseResults(jsonRootObj, null);
             } else {
@@ -410,7 +444,7 @@ public class GenericRestAdapter implements BridgeAdapter {
             throw new BridgeError("The Generic Rest adapter was expecting" +
                 " a return type of JSON object or array.");
         }
-        
+
         return jsonArray;
     }
 }
