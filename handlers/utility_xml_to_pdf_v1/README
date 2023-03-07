@@ -1,0 +1,70 @@
+# Utility XML to PDF
+Utility XML to PDF V1
+
+## Parameters
+[Error Handling]
+  Select between returning an error message, or raising an exception.
+[Kapp Slug]
+  The kapp to upload the file to.
+[Form Slug]
+  The form to upload the file to.
+[Filename]
+  The name to give the created file without the 'pdf' extension.
+[Submission Id Containing an Image Attachment]
+  The Submission Id of the submission that contains an image attachment to be included in the PDF.
+[Image Attachment Field Name]
+  The name of the field where the image attachment is stored.
+[XHTML]
+  Well formed XHTML input as string.  Use ##Image## to indicate where the image source reference should be. Example  <img source="##Image##"/>"
+
+## Results
+[Handler Error Message]
+  Error message if an error was encountered and Error Handling is set to "Error Message".
+[File]
+  The file reference to the uploaded file in the Kinetic Filestore
+
+### Sample configuration
+Error Handling:         Raise Error
+Kapp Slug:              services
+Form Slug:              pdf-signature-test
+Filename:               SignedDocument
+Submission ID:          4c31e018-fda9-11ec-8db2-e58d8bda3aca
+Attachment Field Name:  Signature,
+XHTML:                  ```<html>
+<head>
+<style type="text/css">
+
+style { display: none }
+p { display: block; color: green }
+p.note { color: red }
+b {font-weight: bold }
+hr {margin-top: 1rem; margin-bottom: 1rem; border-top:1px solid black}
+
+</style>
+<title>Your Title Here</title>
+</head>
+<body>
+<hr></hr>
+<a href="http://somegreatsite.com=">Link Name</a>
+is a link to another nifty site
+<h1>This is a Header</h1>
+<h2>This is a Medium Header</h2>
+Send me mail at <a href="mailto:support@yourcompany.com">
+support@yourcompany.com</a>.
+<p> This is a new paragraph!</p>
+<p> <b>This is a new paragraph!</b></p>
+<p> <b>WAHOO!</b> </p>
+<br></br>
+<br></br>
+<br></br>
+<b><i>This is a new sentence without a paragraph break, in bold italics.</i></b>
+<hr></hr>
+<img src="##Image##" width="200"/>
+</body>
+</html>```
+
+## Detailed Description
+  This handler generates a PDF file based on inputs.  It can include an image attachment from an existing submission.
+  The PDF file is uploaded to the Kinetic Platform Filestore and the output is the reference to the file.  A second
+  handler or routine (e.g., Kinetic Submission Update) should be used to update an attachment field with the output
+  from this handler.
