@@ -39,21 +39,25 @@ class UtilityXmlToPdfV1
     response_code = nil
 
     begin
+      submission_result = nil
+
       # Image File(s) variables
       files = []
 
-      #Retrieve Image url
-      #Submission API Route including Values
-      submission_api_route = "#{@api_location}/submissions/"+
-        "#{URI.escape(@parameters['submission_id'])}?include=values"
-      puts "Route to Submission with Attachment File: #{submission_api_route}" if @debug_logging_enabled
+      unless @parameters['submission_id'].to_s.empty?
+        #Retrieve Image url
+        #Submission API Route including Values
+        submission_api_route = "#{@api_location}/submissions/"+
+          "#{URI.escape(@parameters['submission_id'])}?include=values"
+        puts "Route to Submission with Attachment File: #{submission_api_route}" if @debug_logging_enabled
 
-      # Retrieve the Submission Values
-      submission_result = RestClient::Resource.new(
-        submission_api_route,
-        user: @info_values["api_username"],
-        password: @info_values["api_password"]
-      ).get
+        # Retrieve the Submission Values
+        submission_result = RestClient::Resource.new(
+          submission_api_route,
+          user: @info_values["api_username"],
+          password: @info_values["api_password"]
+        ).get
+      end
 
       # If the submission exists
       unless submission_result.nil?
@@ -89,7 +93,7 @@ class UtilityXmlToPdfV1
         end
       end
 
-      unless files.nil?
+      unless files.empty?
         temp_sig_file = Tempfile.new(['file', '.png'], binmode: true)
         download = open(files[0]['url'],:http_basic_authentication=>[@info_values["api_username"],@info_values["api_password"]])
         IO.copy_stream(download, temp_sig_file)
@@ -148,8 +152,10 @@ class UtilityXmlToPdfV1
       begin
         temp_file.unlink
         puts "Deleted the stored PDF file: #{temp_path}" if @debug_logging_enabled
-        temp_sig_file.unlink
-        puts "Deleted the working image file: #{temp_sig_file.path} ...or maybe it was deleted before" if @debug_logging_enabled
+        unless files.empty?
+          temp_sig_file.unlink
+          puts "Deleted the working image file: #{temp_sig_file.path} ...or maybe it was deleted before" if @debug_logging_enabled
+        end
       rescue
       end
     end

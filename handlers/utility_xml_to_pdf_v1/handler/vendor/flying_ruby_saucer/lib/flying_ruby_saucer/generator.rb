@@ -7,8 +7,6 @@ module FlyingRubySaucer
       class_path  = ".:#{java_path}/bin"
 
       Dir.glob("#{java_path}/jar/*.jar") do |jar|
-        #puts "here"
-        #puts jar
         class_path << ":#{jar.to_s.gsub(/\&/, '\\\&').gsub(/\s/, '\ ')}"
       end
 
