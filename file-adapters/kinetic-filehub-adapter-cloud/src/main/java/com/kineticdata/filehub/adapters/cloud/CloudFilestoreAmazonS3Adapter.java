@@ -162,7 +162,8 @@ public class CloudFilestoreAmazonS3Adapter extends CloudFilestoreAdapter {
 
                     // Set the encryption options
                     AWSS3PutObjectOptions options = new AWSS3PutObjectOptions();
-                    options.serverSideEncryption(ObjectMetadata.ServerSideEncryption.AES256);
+                    //this is automatically enabled as of 2023
+//                    options.serverSideEncryption(ObjectMetadata.ServerSideEncryption.AES256);
 
                     // Set the content type/length metadata
                     MutableContentMetadata md = new BaseMutableContentMetadata();
