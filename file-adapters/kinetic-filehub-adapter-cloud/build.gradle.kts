@@ -1,5 +1,8 @@
+import java.text.SimpleDateFormat
+import java.util.Date
 
 plugins {
+    id("net.nemerosa.versioning") version "2.14.0"
   `java-library`
   `maven-publish`
 }
@@ -60,7 +63,7 @@ dependencies {
 }
 
 group = "com.kineticdata.filehub.adapters.cloud"
-version = "1.0.3-SNAPSHOT"
+version = "1.0.3"
 description = "kinetic-filehub-adapter-cloud"
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 
@@ -86,4 +89,21 @@ tasks.withType<JavaCompile>() {
 
 tasks.withType<Javadoc>() {
   options.encoding = "UTF-8"
+}
+versioning {
+  gitRepoRootDir = "../../"
+}
+tasks.processResources {
+  duplicatesStrategy = DuplicatesStrategy.INCLUDE
+  val currentDate = SimpleDateFormat("yyyy-MM-dd").format(Date())
+  from("src/main/resources"){
+    filesMatching("**/*.version") {    
+      expand(    
+        "buildNumber" to versioning.info.build,
+        "buildDate" to currentDate,    
+        "timestamp" to System.currentTimeMillis(),    
+        "version" to project.version    
+      )    
+    }
+  }
 }
