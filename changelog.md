@@ -24,5 +24,4 @@ Utilities [bridge-adapter] (2022-07-25)
 Utilities [bridge-adapters] (2024-02-20)
   * [kinetic-bridgehub-adapter-generic-rest] v1.0.2
     * updated snakeyaml version due to vulnerability
-  * [kinetic-bridgehub-adapter-azure] v1.0.5
     * updated org.json version due to vulnerability
