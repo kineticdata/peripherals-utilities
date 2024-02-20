@@ -20,3 +20,9 @@ Utilities [handlers] (2022-04-14)
 Utilities [bridge-adapter] (2022-07-25)
 * [kinetic-bridgehub-adapter-generic-rest]
     * Added XML as a source schema option
+
+Utilities [bridge-adapters] (2024-02-20)
+  * [kinetic-bridgehub-adapter-generic-rest] v1.0.2
+    * updated snakeyaml version due to vulnerability
+  * [kinetic-bridgehub-adapter-azure] v1.0.5
+    * updated org.json version due to vulnerability
