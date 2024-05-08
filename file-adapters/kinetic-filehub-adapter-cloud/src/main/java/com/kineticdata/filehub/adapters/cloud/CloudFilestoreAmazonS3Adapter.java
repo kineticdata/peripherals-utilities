@@ -160,10 +160,6 @@ public class CloudFilestoreAmazonS3Adapter extends CloudFilestoreAdapter {
                     Path tempFile = Files.createTempFile("kinetic-filehub", ".tmp");
                     IOUtils.copyLarge(inputStream, new FileOutputStream(tempFile.toFile()));
 
-                    // Set the encryption options
-                    AWSS3PutObjectOptions options = new AWSS3PutObjectOptions();
-                    options.serverSideEncryption(ObjectMetadata.ServerSideEncryption.AES256);
-
                     // Set the content type/length metadata
                     MutableContentMetadata md = new BaseMutableContentMetadata();
                     md.setContentLength(Files.size(tempFile));
@@ -176,7 +172,7 @@ public class CloudFilestoreAmazonS3Adapter extends CloudFilestoreAdapter {
                     s3Object.getPayload().setContentMetadata(md);
 
                     // Put the encrypted object to s3
-                    s3Client.putObject(getContainer(), s3Object, options);
+                    s3Client.putObject(getContainer(), s3Object);
                     // Delete the tempfile
                     tempFile.toFile().delete();
                 } catch (Exception e) {
