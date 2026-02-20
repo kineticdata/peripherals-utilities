@@ -105,12 +105,15 @@ public class CloudFilestoreAmazonS3Adapter extends CloudFilestoreAdapter {
         java.util.Properties overrides = new java.util.Properties();
         String region = properties.getValue(Properties.REGION);
         if (region != null && !region.isEmpty()) {
-            overrides.setProperty("aws-s3.endpoint","https://s3-"+region.trim()+".amazonaws.com");
-        }        
-        
+            String endpoint = "https://s3." + region.trim() + ".amazonaws.com";
+            overrides.setProperty("jclouds.regions", region.trim());
+            overrides.setProperty("jclouds.region." + region.trim() + ".endpoint", endpoint);
+            overrides.setProperty("aws-s3.endpoint", endpoint);
+        }
+
         return ContextBuilder.newBuilder("aws-s3")
             .credentials(
-                properties.getValue(Properties.ACCESS_KEY), 
+                properties.getValue(Properties.ACCESS_KEY),
                 properties.getValue(Properties.SECRET_ACCESS_KEY))
             .overrides(overrides)
             .buildView(BlobStoreContext.class);
