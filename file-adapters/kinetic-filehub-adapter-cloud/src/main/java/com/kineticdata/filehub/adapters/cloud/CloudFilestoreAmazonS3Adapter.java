@@ -32,6 +32,7 @@ public class CloudFilestoreAmazonS3Adapter extends CloudFilestoreAdapter {
         public static final String SECRET_ACCESS_KEY = "Secret Access Key";
         public static final String REGION = "Region";
         public static final String ROOT_FOLDER = "Root Folder";
+        public static final String CUSTOM_ENDPOINT = "Custom Endpoint";
     }
     
     /** 
@@ -55,6 +56,8 @@ public class CloudFilestoreAmazonS3Adapter extends CloudFilestoreAdapter {
         new ConfigurableProperty(Properties.REGION)
             .setIsRequired(false),
         new ConfigurableProperty(Properties.ROOT_FOLDER)
+            .setIsRequired(false),
+        new ConfigurableProperty(Properties.CUSTOM_ENDPOINT)
             .setIsRequired(false)
     );
     
@@ -104,16 +107,28 @@ public class CloudFilestoreAmazonS3Adapter extends CloudFilestoreAdapter {
     protected BlobStoreContext buildBlobStoreContext() {
         java.util.Properties overrides = new java.util.Properties();
         String region = properties.getValue(Properties.REGION);
+        String customEndpoint = properties.getValue(Properties.CUSTOM_ENDPOINT);
+        String endpoint = null;
+
+
+        if (customEndpoint !=null && !customEndpoint.isEmpty()) {
+            endpoint = customEndpoint;
+        }
         if (region != null && !region.isEmpty()) {
-            overrides.setProperty("aws-s3.endpoint","https://s3-"+region.trim()+".amazonaws.com");
-        }        
-        
+            if(endpoint == null){
+                endpoint = "https://s3-"+region.trim()+".amazonaws.com";
+            }
+            overrides.setProperty("aws-s3.endpoint", endpoint);
+            overrides.setProperty("jclouds.regions", region.trim());
+            overrides.setProperty("jclouds.region." + region.trim() + ".endpoint", endpoint);
+        }
+
         return ContextBuilder.newBuilder("aws-s3")
-            .credentials(
-                properties.getValue(Properties.ACCESS_KEY), 
-                properties.getValue(Properties.SECRET_ACCESS_KEY))
-            .overrides(overrides)
-            .buildView(BlobStoreContext.class);
+                .credentials(
+                        properties.getValue(Properties.ACCESS_KEY),
+                        properties.getValue(Properties.SECRET_ACCESS_KEY))
+                .overrides(overrides)
+                .buildView(BlobStoreContext.class);
     }
 
     @Override
