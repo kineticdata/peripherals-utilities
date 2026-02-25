@@ -117,8 +117,8 @@ public class CloudFilestoreAmazonS3Adapter extends CloudFilestoreAdapter {
 
         return ContextBuilder.newBuilder("aws-s3")
                 .credentials(
-                        properties.getValue(Properties.ACCESS_KEY),
-                        properties.getValue(Properties.SECRET_ACCESS_KEY))
+                    properties.getValue(Properties.ACCESS_KEY),
+                    properties.getValue(Properties.SECRET_ACCESS_KEY))
                 .overrides(overrides)
                 .buildView(BlobStoreContext.class);
     }
