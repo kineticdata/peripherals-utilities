@@ -106,7 +106,7 @@ public class CloudFilestoreAmazonS3Adapter extends CloudFilestoreAdapter {
         String region = properties.getValue(Properties.REGION);
 
         if (region != null && !region.isEmpty()) {
-            String endpoint = "https://s3-"+region.trim()+".amazonaws.com"
+            String endpoint = "https://s3-"+region.trim()+".amazonaws.com";
             overrides.setProperty("aws-s3.endpoint", endpoint);
             overrides.setProperty("jclouds.regions", region.trim());
             overrides.setProperty("jclouds.region." + region.trim() + ".endpoint", endpoint);
