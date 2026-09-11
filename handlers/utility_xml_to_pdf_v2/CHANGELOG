@@ -1,0 +1,10 @@
+v2.1 (2026-09-10)
+* Update for Platform v7 upgrades to jRuby10 (Ruby 3.4), which deprecated strategies used in this handler to create temp files from URLs.
+
+v2 (2025-01-07)
+* Updated to allow multiple attachment fields to be used, and enable all attachments from an attachment field to be included in the PDF
+* This changed one of the run-time inputs from "Image Attachment Field Name" to "Image Attachment Mapping"
+* Image references are different as well to support inserting multiple images.
+
+Utility XML to PDF (2022-07-06)
+ * Initial version.  See README for details.

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<taskDefinition id="utility_xml_to_pdf" name="Utility XML to PDF" schema_version="1.0" version="2">
+  <author>support@kineticdata.com</author>
+  <description>This handler will create a PDF file from provided HTML code. A signature (or any other Submission attachment) can be included dynamically.  The PDF file is uploaded to the Kinetic Filestore and the resulting file description is returned. The file description can be used with a subsequent handler to update an attachment field on a submission.</description>
+  <helpurl></helpurl>
+  <visible>false</visible>
+  <deferrable>false</deferrable>
+  <parameters>
+    <parameter id="error_handling" label="Error Handling" required="true" tooltip="Determine what to return if an error is encountered." menu="Error Message,Raise Error">Error Message</parameter>
+    <parameter id="kapp_slug" label="Kapp Slug" required="true" tooltip="The kapp to upload the file to."></parameter>
+    <parameter id="form_slug" label="Form Slug" required="true" tooltip="The form to upload the file to."></parameter>
+    <parameter id="filename" label="Filename" required="false" tooltip="The name to give the created file without the 'pdf' extension."></parameter>
+    <parameter id="attachment_mappings" label="Image Attachment Mappings" required="false" tooltip="A JSON object that maps how attachments fields should be processed. This format is very specific: {&quot;&lt;submission_id_with_attachment&gt;&quot;{&quot;attachment_field_name&quot;: {&quot;tag_pattern&quot;: &quot;##&lt;tag name&gt;_*##&quot;, &quot;image_template&quot;:&quot;&lt;img src=\&quot;\&quot; width=\&quot;200\&quot; class=\&quot;signature\&quot;&gt;&lt;/img&gt;&quot;}}}.  If the tag_pattern is left off, the ##&lt;attachment_field_name&gt;_*## is used as the tag; If the image_template is left off, &lt;img src=&quot;&quot;&gt;&lt;/img&gt; is used."></parameter>
+    <parameter id="xhtml" label="XHTML" required="true" tooltip="Well formed XHTML input as string. Use the tag pattern(s) specified in the Attachment Mappings input (i.e., &quot;##Signature_*##&quot;) to indicate where the image elements should appear."></parameter>
+  </parameters>
+
+  <handler name="utility_xml_to_pdf" version="2">
+    <infos>
+      <info name="api_username">&lt;%= @info['api_username'] %&gt;</info>
+      <info name="api_password">&lt;%= @info['api_password'] %&gt;</info>
+      <info name="api_location">&lt;%= @info['api_location'] %&gt;</info>
+      <info name="enable_debug_logging">&lt;%= @info["enable_debug_logging"] %&gt;</info>
+    </infos>
+    <parameters>
+      <parameter name="error_handling">&lt;%= @parameters["error_handling"] %&gt;</parameter>
+      <parameter name="kapp_slug">&lt;%= @parameters["kapp_slug"] %&gt;</parameter>
+      <parameter name="form_slug">&lt;%= @parameters["form_slug"] %&gt;</parameter>
+      <parameter name="filename">&lt;%= @parameters["filename"] %&gt;</parameter>
+      <parameter name="attachment_mappings">&lt;%= @parameters["attachment_mappings"] %&gt;</parameter>
+      <parameter name="xhtml">&lt;%= @parameters["xhtml"] %&gt;</parameter>
+    </parameters>
+  </handler>
+  <results format="xml">
+    <result name="Handler Error Message"/>
+    <result name="Handler Error Key"/>
+    <result name="Response Code"/>
+    <result name="File"/>
+  </results>
+</taskDefinition>

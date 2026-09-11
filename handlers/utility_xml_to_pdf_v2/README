@@ -1,0 +1,88 @@
+# Utility XML to PDF
+Utility XML to PDF V2
+
+## Parameters
+[Error Handling]
+  Select between returning an error message, or raising an exception.
+[Kapp Slug]
+  The kapp to upload the file to.
+[Form Slug]
+  The form to upload the file to.
+[Filename]
+  The name to give the created file without the 'pdf' extension.
+
+[Image Attachment Mappings]
+  A JSON object that maps how attachments fields should be processed. This format is very specific, and does support attachments from multiple submissions:
+  ```{
+    "submission_id": {
+      "signature_field": {
+        "tag_pattern": "##Signature_*##",
+        "image_template": "<img src=\"\" width=\"200\" class=\"signature\"></img>"
+      },
+      "photos_field": {
+        "tag_pattern": "##Photo_*##",
+        "image_template": "<img src=\"\" class=\"photo\"></img>"
+      }
+    }
+  }```
+
+  Note: If the tag_pattern is left off, the ##<attachment_field_name>_*## is used as the tag.
+  Note: If the image_template is left off, '<img src="" width="600" height="auto"></img><br/>' is used.
+
+[XHTML]
+  Well formed XHTML input as string. Use the tag pattern(s) specified in the Attachment Mappings input (i.e., "##Signature_*##") to indicate where the image elements should appear.
+
+## Results
+[Handler Error Message]
+  Error message if an error was encountered and Error Handling is set to "Error Message".
+[File]
+  The file reference to the uploaded file in the Kinetic Filestore
+
+### Sample configuration
+Error Handling:              Raise Error
+Kapp Slug:                   services
+Form Slug:                   pdf-signature-test
+Filename:                    SignedDocument
+Image Attachment Mappings:   {"4c31e018-fda9-11ec-8db2-e58d8bda3aca": {"Signature": {"tag_pattern":"##Image_*##", "image_template":"<img src=\"\" width=\"200\"></img>"}}},
+XHTML:                       ```<html>
+<head>
+<style type="text/css">
+
+style { display: none }
+p { display: block; color: green }
+p.note { color: red }
+b {font-weight: bold }
+hr {margin-top: 1rem; margin-bottom: 1rem; border-top:1px solid black}
+
+</style>
+<title>Your Title Here</title>
+</head>
+<body>
+<hr></hr>
+<a href="http://somegreatsite.com=">Link Name</a>
+is a link to another nifty site
+<h1>This is a Header</h1>
+<h2>This is a Medium Header</h2>
+Send me mail at <a href="mailto:support@yourcompany.com">
+support@yourcompany.com</a>.
+<p> This is a new paragraph!</p>
+<p> <b>This is a new paragraph!</b></p>
+<p> <b>WAHOO!</b> </p>
+<br></br>
+<br></br>
+<br></br>
+<b><i>This is a new sentence without a paragraph break, in bold italics.</i></b>
+<hr></hr>
+##Image_*##"
+</body>
+</html>```
+
+## Detailed Description
+  This handler generates a PDF file based on inputs.  It can include an image attachments from an existing submissions.
+  The PDF file is uploaded to the Kinetic Platform Filestore and the output is the reference to the file.  A second
+  handler or routine (e.g., Kinetic Submission Update) should be used to update an attachment field with the output
+  from this handler.
+
+  Images will not process styling against the img tag or via CSS classes.  The way to control image sizing is to
+  include a 'width' or 'height' property on the image element.  Without at least a width value, the image will be
+  rendered in its intrinsic size.  When included, height and width are pixels (e.g., 200 equates to 200px).
