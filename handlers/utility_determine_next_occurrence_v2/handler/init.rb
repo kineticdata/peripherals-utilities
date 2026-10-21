@@ -2,6 +2,42 @@
 require File.expand_path(File.join(File.dirname(__FILE__), 'dependencies'))
 
 class UtilityDetermineNextOccurrenceV2
+  # Supported values for the 'Recurrence Type' parameter
+  RECURRENCE_TYPES = ['minutely', 'hourly', 'daily', 'weekly', 'monthly', 'yearly']
+
+  # Supported values for the 'Timing' parameter (monthly and yearly only)
+  TIMINGS = ['relative', 'absolute']
+
+  # Month names accepted by the 'Months' parameter, mapped to IceCube symbols
+  MONTHS = {
+    'january' => :january, 'february' => :february, 'march' => :march,
+    'april' => :april, 'may' => :may, 'june' => :june, 'july' => :july,
+    'august' => :august, 'september' => :september, 'october' => :october,
+    'november' => :november, 'december' => :december
+  }
+
+  # Weekday names accepted by the 'Weekdays' parameter, mapped to IceCube
+  # symbols.  The keys also name the matching '<weekday>_index' parameters.
+  WEEKDAYS = {
+    'sunday' => :sunday, 'monday' => :monday, 'tuesday' => :tuesday,
+    'wednesday' => :wednesday, 'thursday' => :thursday, 'friday' => :friday,
+    'saturday' => :saturday
+  }
+
+  # Values accepted by the '<weekday>_index' parameters, mapped to the
+  # occurrence numbers IceCube expects (-1 is the last occurrence in the month).
+  # 'All' uses 1-4 plus last, which also covers a fifth occurrence when a month
+  # has one.
+  WEEKDAY_INDEXES = {
+    'all' => [1, 2, 3, 4, -1], 'first' => [1], 'second' => [2],
+    'third' => [3], 'fourth' => [4], 'last' => [-1]
+  }
+
+  # How far ahead to look for an occurrence before deciding the schedule can
+  # never occur.  Long enough for any real schedule, including February 29
+  # with a multi-year interval.
+  SEARCH_YEARS = 100
+
   def initialize(input)
     # Set the input document attribute
     @input_document = REXML::Document.new(input)
@@ -14,208 +50,209 @@ class UtilityDetermineNextOccurrenceV2
 
     @enable_debug_logging = @info_values['enable_debug_logging'] == 'Yes'
 
-    # Store parameters values in a Hash of parameter names to values.
+    # Store parameters values in a Hash of parameter names to values.  Values
+    # are stripped so stray whitespace from the tree doesn't fail validation.
     @parameters = {}
     REXML::XPath.match(@input_document, '/handler/parameters/parameter').each do |node|
-      @parameters[node.attribute('name').value] = node.text.to_s
+      @parameters[node.attribute('name').value] = node.text.to_s.strip
+    end
+    puts "Parameters: #{@parameters.inspect}" if @enable_debug_logging
+
+    # Recurrence Type (always required)
+    @recurrence_type = @parameters['recurrence_type'].downcase
+    if !RECURRENCE_TYPES.include?(@recurrence_type)
+      raise StandardError, "The 'Recurrence Type' value '#{@parameters['recurrence_type']}' doesn't match one of #{RECURRENCE_TYPES.join(', ')}"
     end
 
-    # Validate reference type
-    recurrence_types = ['minutely','hourly','daily','weekly','monthly','yearly']
-    if !recurrence_types.include? @parameters['recurrence_type'].downcase
-      raise StandardError, "The value '#{@parameters['recurrence_type']}' doesn't match one of #{recurrence_types.join(",")}"
-    end
+    # Start and Interval (always required)
+    @start_time = parse_start_time(@parameters['start'])
+    @interval = parse_interval(@parameters['interval'])
+    puts "Start time: #{@start_time}, Interval: #{@interval}" if @enable_debug_logging
 
-    # Validate other inputs are entered and configure them for use
-    # Timing
-    timing_required = ['monthly','yearly']
-    if timing_required.include? @parameters['recurrence_type'].downcase && (@parameters['timing'].nil? || @parameters['timing'].empty?)
-      raise StandardError, "The 'Timing' field is required for recurrence type '#{@parameters['recurrence_type']}'"
-    end
-    if ((timing_required.include? @parameters['recurrence_type'].downcase) && (!['relative','absolute'].include? @parameters['timing'].downcase))
-      raise StandardError, "The 'Timing' value must be either 'Relative' or 'Absolute'. Current value: '#{@parameters['timing']}'"
-    end
-
-    # Interval
-    interval_required = ['minutely','hourly','daily','weekly','monthly','yearly']
-    if interval_required.include? @parameters['recurrence_type'].downcase && (@parameters['interval'].nil? || @parameters['interval'].empty?)
-      raise StandardError, "The 'Interval' field is required for recurrence type '#{@parameters['recurrence_type']}'"
-    end
-
-    # Months
-    months_required = ['yearly']
-    if months_required.include? @parameters['recurrence_type'].downcase
-      if (@parameters['months'].nil? || @parameters['months'].empty?)
-        raise StandardError, "The 'Months' field is required for recurrence type '#{@parameters['recurrence_type']}'"
+    # Timing (monthly and yearly only)
+    if ['monthly', 'yearly'].include?(@recurrence_type)
+      @timing = @parameters['timing'].downcase
+      if !TIMINGS.include?(@timing)
+        raise StandardError, "The 'Timing' value must be either 'Relative' or 'Absolute' for recurrence type '#{@parameters['recurrence_type']}'. Current value: '#{@parameters['timing']}'"
       end
+    end
 
-      # Set up month inputs
-      @months=[]
-      if !@parameters['months'].nil? && !@parameters['months'].empty?
-        month_conversion = {"january" => :january,"february" => :february,"march" => :march, "april" => :april, "may" => :may, "june" => :june, "july" => :july, "august" => :august, "september" => :september, "october" => :october, "november" => :november, "december" => :december}
-        @parameters['months'] = @parameters['months'].split(",").map{|x| x.strip}
-        #JSON.parse(@parameters['months']).each { |x|
-        @parameters['months'].each { |x|
-          @months.push(month_conversion[x.downcase])
-        }
-      end
+    # Months (yearly only)
+    if @recurrence_type == 'yearly'
+      @months = parse_list('months', 'Months', MONTHS)
       puts "Months (after conversion): #{@months}" if @enable_debug_logging
     end
 
-    # Days of Month
-    daysofmonth_required = {'monthly' => {'timing' => 'absolute'}, 'yearly' => {'timing' => 'absolute'}}
-    if ((daysofmonth_required.has_key? @parameters['recurrence_type'].downcase) && (daysofmonth_required[@parameters['recurrence_type'].downcase]['timing'] == @parameters['timing'].downcase))
-      if (@parameters['days_of_month'].nil? || @parameters['days_of_month'].empty?)
-        raise StandardError, "The 'Days of Month' field is required for recurrence type '#{@parameters['recurrence_type']}'"
-      end
-
-      # Convert Days of Month array to numberics and convert "Last" to -1
-      @days_of_month = []
-      if !@parameters['days_of_month'].nil? && !@parameters['days_of_month'].empty?
-        @parameters['days_of_month'] = @parameters['days_of_month'].split(",").map{|x| x.strip}
-        #JSON.parse(@parameters['days_of_month']).each {|x|
-        @parameters['days_of_month'].each {|x|
-          if x.downcase==="last"
-            @days_of_month.push(-1)
-          else
-            @days_of_month.push(x.to_i)
-          end
-        }
-      end
+    # Days of Month (monthly/yearly with absolute timing)
+    if @timing == 'absolute'
+      @days_of_month = parse_days_of_month
       puts "Days of Month (after conversion): #{@days_of_month}" if @enable_debug_logging
     end
 
-    # Weekdays
-    weekdays_required = {'weekly' => {'timing' => ''}, 'monthly' => {'timing' => 'relative'}, 'yearly' => {'timing' => 'relative'}}
-    if ((weekdays_required.has_key? @parameters['recurrence_type'].downcase) && (weekdays_required[@parameters['recurrence_type'].downcase]['timing'] == @parameters['timing'].downcase))
-      if (@parameters['weekdays'].nil? || @parameters['weekdays'].empty?)
-        raise StandardError, "The 'Weekdays' field is required for recurrence type '#{@parameters['recurrence_type']}'" if @parameters['recurrence_type'].downcase == "weekly"
-        raise StandardError, "The 'Weekdays' field is required for recurrence type '#{@parameters['recurrence_type']}' and timing '#{@parameters['timing']}'" if ['monthly','yearly'].include? @parameters['recurrence_type'].downcase
-      end
-
-      @weekdays = []
-      if !@parameters['weekdays'].nil? && !@parameters['weekdays'].empty?
-        weekday_conversion = {"sunday" => :sunday,"monday" => :monday,"tuesday" => :tuesday, "wednesday" => :wednesday, "thursday" => :thursday, "friday" => :friday, "saturday" => :saturday}
-        @parameters['weekdays'] = @parameters['weekdays'].split(",").map{|x| x.strip}
-        #JSON.parse(@parameters['weekdays']).each { |x|
-        @parameters['weekdays'].each { |x|
-          @weekdays.push(weekday_conversion[x.downcase])
-        }
-      end
+    # Weekdays (weekly, or monthly/yearly with relative timing).  Weekly
+    # ignores Timing, so a leftover Timing value can't hide the weekdays.
+    if @recurrence_type == 'weekly' || @timing == 'relative'
+      @weekdays = parse_list('weekdays', 'Weekdays', WEEKDAYS)
       puts "Weekdays (after conversion): #{@weekdays}" if @enable_debug_logging
-
     end
 
-    # Weekday and Matching Indexes
-    weekday_index_required = {'monthly' => {'timing' => 'relative'}, 'yearly' => {'timing' => 'relative'}}
-    if ((weekday_index_required.has_key? @parameters['recurrence_type'].downcase) && (weekday_index_required[@parameters['recurrence_type'].downcase]['timing'] == @parameters['timing'].downcase))
-
-      if ((@weekdays.include? :sunday    && (@parameters['sunday_index'].nil?    || @parameters['sunday_index'].empty?)) ||
-        (@weekdays.include? :monday      && (@parameters['monday_index'].nil?    || @parameters['monday_index'].empty?)) ||
-        (@weekdays.include? :tuesday     && (@parameters['tuesday_index'].nil?   || @parameters['tuesday_index'].empty?)) ||
-        (@weekdays.include? :wednesday   && (@parameters['wednesday_index'].nil? || @parameters['wednesday_index'].empty?)) ||
-        (@weekdays.include? :thursday    && (@parameters['thursday_index'].nil?  || @parameters['thursday_index'].empty?)) ||
-        (@weekdays.include? :friday      && (@parameters['friday_index'].nil?    || @parameters['friday_index'].empty?)) ||
-        (@weekdays.include? :saturday    && (@parameters['saturday_index'].nil?  || @parameters['saturday_index'].empty?)))
-        raise StandardError, "A corresponding weekday index is required for each weekday identified for recurrence type '#{@parameters['recurrence_type']}' and timing '#{@parameters['timing']}'"
+    # Weekday indexes (monthly/yearly with relative timing), built into the
+    # Hash that IceCube's day_of_week expects, e.g. {:monday => [1, -1]}
+    if @timing == 'relative'
+      @weekdays_with_index = {}
+      @weekdays.each do |weekday|
+        @weekdays_with_index[weekday] = parse_weekday_index(weekday.to_s)
       end
-
-      #set up day inputs with index
-      @weekdays_with_index = []
-      if @weekdays.include? :sunday
-        @weekdays_with_index.push([:sunday, weekday_index("sunday")])
-      end
-      if @weekdays.include? :monday
-        @weekdays_with_index.push([:monday, weekday_index("monday")])
-      end
-      if @weekdays.include? :tuesday
-        @weekdays_with_index.push([:tuesday, weekday_index("tuesday")])
-      end
-      if @weekdays.include? :wednesday
-        @weekdays_with_index.push([:wednesday, weekday_index("wednesday")])
-      end
-      if @weekdays.include? :thursday
-        @weekdays_with_index.push([:thursday, weekday_index("thursday")])
-      end
-      if @weekdays.include? :friday
-        @weekdays_with_index.push([:friday, weekday_index("friday")])
-      end
-      if @weekdays.include? :saturday
-        @weekdays_with_index.push([:saturday, weekday_index("saturday")])
-      end
-      puts "Weekdays with Index (after conversion): #{@weekdays_with_index}" if @enable_debug_logging
-      @weekdays_with_index_as_param = Hash[*@weekdays_with_index.flatten(1)]
-      puts "Weekdays with Index as parameters: #{@weekdays_with_index_as_param}" if @enable_debug_logging
+      puts "Weekdays with Index: #{@weekdays_with_index}" if @enable_debug_logging
     end
-
   end
 
   def execute()
-
-    rule = case @parameters['recurrence_type'].downcase
+    # Build the recurrence rule for the requested type and timing
+    rule = case @recurrence_type
       when "minutely"
-        IceCube::Rule.minutely(@parameters['interval'].to_i)
+        IceCube::Rule.minutely(@interval)
       when "hourly"
-        IceCube::Rule.hourly(@parameters['interval'].to_i)
+        IceCube::Rule.hourly(@interval)
       when "daily"
-        IceCube::Rule.daily(@parameters['interval'].to_i)
+        IceCube::Rule.daily(@interval)
       when "weekly"
-        IceCube::Rule.weekly(@parameters['interval'].to_i).day(*@weekdays)
+        IceCube::Rule.weekly(@interval).day(*@weekdays)
       when "monthly"
-        if @parameters['timing'].downcase == "absolute"
-          IceCube::Rule.monthly(@parameters['interval'].to_i).day_of_month(*@days_of_month)
+        if @timing == "absolute"
+          IceCube::Rule.monthly(@interval).day_of_month(*@days_of_month)
         else
-          IceCube::Rule.monthly(@parameters['interval'].to_i).day_of_week(@weekdays_with_index_as_param)
+          IceCube::Rule.monthly(@interval).day_of_week(@weekdays_with_index)
         end
       when "yearly"
-        if @parameters['timing'].downcase == "absolute"
-          IceCube::Rule.yearly(@parameters['interval'].to_i).month_of_year(*@months).day_of_month(*@days_of_month)
+        if @timing == "absolute"
+          IceCube::Rule.yearly(@interval).month_of_year(*@months).day_of_month(*@days_of_month)
         else
-          IceCube::Rule.yearly(@parameters['interval'].to_i).month_of_year(*@months).day_of_week(@weekdays_with_index_as_param)
+          IceCube::Rule.yearly(@interval).month_of_year(*@months).day_of_week(@weekdays_with_index)
         end
     end
+    # Describe the rule in iCalendar form for logs and errors.  IceCube's
+    # to_s needs ActiveSupport's i18n, which may not be loaded in Task.
+    rule_description = rule.to_ical
+    puts "Rule: #{rule_description}" if @enable_debug_logging
 
-    # convert start time parameter to date/time
-    start_time = Time.parse(@parameters['start'])
-
-    schedule = IceCube::Schedule.new(start_time)
+    # Anchor the schedule at the start time
+    schedule = IceCube::Schedule.new(@start_time)
     schedule.add_recurrence_rule rule
 
+    # IceCube searches forever for a rule that can never match (ex: February
+    # 30, or the 31st every 12 months starting in April), which would hang the
+    # Task engine thread.  Confirm an occurrence exists within a bounded window
+    # first, since that search stops at its closing time.
+    search_from = [Time.now, @start_time].max
+    search_until = search_from + (SEARCH_YEARS * 366 * 24 * 60 * 60)
+    if !schedule.occurs_between?(search_from, search_until)
+      raise StandardError, "No occurrence of the schedule '#{rule_description}' starting #{@start_time} could be found within #{SEARCH_YEARS} years. Check that the Months and Days of Month can occur together for the Interval given."
+    end
+
+    # Find the first occurrence after now
     next_occurrence = schedule.next_occurrence
 
-    # return next occurrence
-     <<-RESULTS
+    # Return the next occurrence in UTC (ex: 2018-03-02 22:00:00 UTC)
+    next_occurrence_utc = next_occurrence.to_time.getutc.to_s
+    puts "Next occurrence: #{next_occurrence_utc}" if @enable_debug_logging
+
+    <<-RESULTS
     <results>
-      <result name="next_occurrence">#{next_occurrence.to_s}</result>
+      <result name="next_occurrence">#{escape(next_occurrence_utc)}</result>
     </results>
     RESULTS
   end
 
+  # Parses the Start parameter.  Ruby's Time.parse reads a value with no offset
+  # as server local time, but this parameter is documented as UTC, so default
+  # to UTC when no offset is given.  A given offset is kept so day boundaries
+  # are calculated in that offset.
+  def parse_start_time(value)
+    if value.empty?
+      raise StandardError, "The 'Start' field is required"
+    end
 
-  def weekday_index(day)
-    index_array = []
-    #@parameters[day+"_index"] = @parameters[day+"_index"].split(",").map{|x| x.strip}
-    day_index = @parameters[day+"_index"].split(",").map{|x| x.strip}
-    #JSON.parse(@parameters[day+"_index"]).each{ |x|
-    #@parameters[day+"_index"].each{ |x|
-    day_index.each{ |x|
-      case x.downcase
-      when "all"
-        index_array.push(1,2,3,4,-1)
-      when "first"
-        index_array.push(1)
-      when "second"
-        index_array.push(2)
-      when "third"
-        index_array.push(3)
-      when "fourth"
-        index_array.push(4)
-      when "last"
-        index_array.push(-1)
+    begin
+      if Date._parse(value)[:offset].nil?
+        Time.parse("#{value} UTC")
+      else
+        Time.parse(value)
       end
-    }
+    rescue ArgumentError
+      raise StandardError, "The 'Start' value '#{value}' is not a parsable date/time (ex: 2017-05-17T14:00:00+00:00)"
+    end
+  end
+
+  # Parses the Interval parameter, which must be a whole number of 1 or more
+  def parse_interval(value)
+    if value !~ /\A\d+\z/ || value.to_i < 1
+      raise StandardError, "The 'Interval' value must be a whole number of 1 or more. Current value: '#{value}'"
+    end
+    value.to_i
+  end
+
+  # Splits a comma separated parameter and converts each entry using the given
+  # Hash of accepted (lowercase) values.  Blank entries, such as from a
+  # trailing comma, are skipped and duplicates are removed.
+  def parse_list(parameter_name, label, accepted_values)
+    entries = split_list(@parameters[parameter_name])
+    if entries.empty?
+      raise StandardError, "The '#{label}' field is required for recurrence type '#{@parameters['recurrence_type']}'#{timing_description}"
+    end
+
+    entries.map { |entry|
+      accepted_values.fetch(entry.downcase) {
+        raise StandardError, "The '#{label}' value '#{entry}' is not valid. Valid values are: #{accepted_values.keys.map(&:capitalize).join(', ')}"
+      }
+    }.uniq
+  end
+
+  # Converts the Days of Month parameter to the numbers IceCube expects, with
+  # 'Last' becoming -1
+  def parse_days_of_month
+    entries = split_list(@parameters['days_of_month'])
+    if entries.empty?
+      raise StandardError, "The 'Days of Month' field is required for recurrence type '#{@parameters['recurrence_type']}'#{timing_description}"
+    end
+
+    entries.map { |entry|
+      if entry.downcase == 'last'
+        -1
+      elsif entry =~ /\A\d+\z/ && (1..31).include?(entry.to_i)
+        entry.to_i
+      else
+        raise StandardError, "The 'Days of Month' value '#{entry}' is not valid. Valid values are 1 through 31 and 'Last'"
+      end
+    }.uniq
+  end
+
+  # Converts a '<weekday>_index' parameter to the occurrence numbers for that
+  # weekday, ex: 'First, Last' becomes [1, -1]
+  def parse_weekday_index(day)
+    label = "#{day.capitalize} Index"
+    entries = split_list(@parameters["#{day}_index"])
+    if entries.empty?
+      raise StandardError, "The '#{label}' field is required when '#{day.capitalize}' is one of the Weekdays for recurrence type '#{@parameters['recurrence_type']}'#{timing_description}"
+    end
+
+    index_array = entries.flat_map { |entry|
+      WEEKDAY_INDEXES.fetch(entry.downcase) {
+        raise StandardError, "The '#{label}' value '#{entry}' is not valid. Valid values are: #{WEEKDAY_INDEXES.keys.map(&:capitalize).join(', ')}"
+      }
+    }.uniq
     puts "#{day}_index array: #{index_array}" if @enable_debug_logging
-    return index_array
+    index_array
+  end
+
+  # Splits a comma separated value into stripped, non-blank entries
+  def split_list(value)
+    value.to_s.split(",").map { |entry| entry.strip }.reject { |entry| entry.empty? }
+  end
+
+  # Describes the timing for validation messages, when timing applies
+  def timing_description
+    @timing.nil? ? "" : " and timing '#{@parameters['timing']}'"
   end
 
   # This is a template method that is used to escape results values (returned in

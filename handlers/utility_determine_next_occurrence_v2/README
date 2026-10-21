@@ -3,19 +3,19 @@ This handler returns the next date/time for a schedule.  Originally designed for
 
 === Parameters
 [Start (UTC)]
-  The time when the schedule should begin looking for the next occurrence. Enter in a parsable Ruby time (standard Request CE Datetime field works; ex format YYYY-MM-DDTHH:MM:SS+00:00).
+  The time when the schedule should begin looking for the next occurrence. Enter in a parsable Ruby time (standard Request CE Datetime field works; ex format YYYY-MM-DDTHH:MM:SS+00:00).  A value with no offset is treated as UTC.
 [Recurrence Type]
   Valid options are 'minutely' [requires interval],'hourly' [requires interval],'daily' [requires interval],'weekly' [requires interval],'monthly' [requires timing, interval and either weekdays or days of month],'yearly' [requires timing, interval, months, and either weekdays or days of month]
 [Timing]
   Required for monthly and yearly Recurrence Types.  Valid options are 'Relative' or 'Absolute'. Relative refers to relatives dates (ex: First Monday in May and June) and Absolute refers to specific dates (ex: 7th and 10th of June)
 [Interval]
-  The interval between the Recurrence Type values.
+  The interval between the Recurrence Type values.  Must be a whole number of 1 or more.
 [Months]
-  The months in which this schedule should execute. Possible vales are entered in a comma separated list, with the values of 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'.  Any combination of values is fine. Example: January, April, July, October
+  Required for the yearly Recurrence Type and ignored for the others. The months in which this schedule should execute. Possible values are entered in a comma separated list, with the values of 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'.  Any combination of values is fine. Example: January, April, July, October
 [Days of Month]
-  The dates on which this schedule should execute. Possible vales are entered in a comma separated list, with the values of 1 through 31, and 'last'.  Any combination of values is fine. Example: 1, 15, Last
+  Required for monthly and yearly Recurrence Types with 'Absolute' Timing. The dates on which this schedule should execute. Possible values are entered in a comma separated list, with the values of 1 through 31, and 'last'.  Any combination of values is fine. Example: 1, 15, Last
 [Weekdays]
-  The weekdays in which this schedule should execute. Possible vales are entered in a comma separated list, with the values of 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'.  Any combination of values is fine. Example: Monday, Thursday, Saturday
+  Required for the weekly Recurrence Type, and for monthly and yearly Recurrence Types with 'Relative' Timing. The weekdays in which this schedule should execute. Possible values are entered in a comma separated list, with the values of 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'.  Any combination of values is fine. Example: Monday, Thursday, Saturday
 [Sunday Index]
   If weekday indexes are used, and an event should occur on some Sundays, include 'All' or any combination of 'First','Second','Third','Fourth','Last'.  Example 1: All, Example 2: First, Second, Last
 [Monday Index]
@@ -38,7 +38,7 @@ This handler returns the next date/time for a schedule.  Originally designed for
 
 ==== Sample Configuration
 Start (UTC):        2016-09-25 14:00:00 UTC
-Recurrence Type:    Monthly
+Recurrence Type:    Yearly
 Timing:             Relative
 Interval:           1
 Months:             January, April, July, October
@@ -58,4 +58,15 @@ a start date, calculates the next occurrence.  This value is returned in string
 format in the result field 'next_occurrence'.
 
 The bulk of the handler code evaluates and transforms the inputs so the IceCube
-library can define the schedule and then perform the evaluation.
+library can define the schedule and then perform the evaluation.  Only the
+parameters that apply to the chosen Recurrence Type and Timing are read, so
+leftover values in the others are ignored.
+
+The handler raises an error when:
+* A required parameter is missing, or a value isn't one of those listed above.
+* The schedule can never occur within 100 years (ex: February 30, or the 31st
+  every 12 months starting in April).
+
+The vendored IceCube library is version 0.16.4, which runs on both older JRuby
+versions (Ruby 2.x) and JRuby 10 (Ruby 3.4).  Version 0.17.0 requires Ruby 3.1
+or later.

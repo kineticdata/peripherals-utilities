@@ -25,3 +25,8 @@ Utilities [bridge-adapters] (2024-02-20)
   * [kinetic-bridgehub-adapter-generic-rest] v1.0.2
     * updated snakeyaml version due to vulnerability
     * updated org.json version due to vulnerability
+
+Utilities [handlers] (2026-10-20)
+* [utility_determine_next_occurrence_v2]
+    * Upgraded IceCube to 0.16.4 so the handler runs on JRuby 10 (Fixnum was removed in Ruby 3.2)
+    * Fixed input validation, weekly schedules with a Timing value, and schedules that can never occur hanging the engine
