@@ -1,2 +1,24 @@
 Utility Determine Next Occurrence V2 (2017-03-03)
 * Initial version.  See README for details.
+
+Utility Determine Next Occurrence V2 (2026-10-20)
+* Upgraded the IceCube library from 0.14.0 to 0.16.4.  0.14.0 used the Fixnum
+  class, which was removed in Ruby 3.2, so weekly, monthly absolute and yearly
+  schedules failed on JRuby 10 with "uninitialized constant ... Fixnum".
+  0.16.4 still runs on older JRuby versions (Ruby 2.x).
+* Weekly schedules now use the Weekdays even when a Timing value is present.
+  Previously any Timing value caused the Weekdays to be ignored and the
+  schedule to fire every day.
+* Fixed validation that never ran (operator precedence), so a missing Interval,
+  Timing or weekday index is now reported instead of silently producing a
+  schedule that fires every day.
+* Unrecognized Months, Weekdays, weekday index or Days of Month values, and an
+  Interval that isn't a whole number of 1 or more, now raise a clear error.
+  Blank entries in comma separated lists (ex: a trailing comma) are ignored.
+* A schedule that can never occur (ex: February 30) now raises an error
+  instead of hanging the Task engine thread.
+* A Start value with no offset is read as UTC, as documented, rather than as
+  the server's local time.
+* The next_occurrence result is always returned in UTC
+  (ex: 2018-03-02 22:00:00 UTC), as documented.  Previously it used the
+  offset of the Start value (ex: +0000).
